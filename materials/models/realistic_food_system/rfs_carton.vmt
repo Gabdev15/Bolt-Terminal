@@ -1,0 +1,9 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/realistic_food_system/rfs_carton_Base_color"
+	"$bumpmap" "models/realistic_food_system/rfs_carton_Normal"
+	$phong 1
+  	$phongexponent 3
+    	$phongboost    0.025
+    	$phongfresnelranges    "[0.05 0.5 1]"
+}

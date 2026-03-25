@@ -1,0 +1,20 @@
+VertexLitGeneric
+{
+	$basetexture "models\realistic_food_system/rfs_dishes_c"
+	$bumpmap "models\realistic_food_system/rfs_dishes_n"
+
+	$nocull 1
+
+	$envmap "env_cubemap" // metalic
+	$normalmapalphaenvmapmask 1
+	$envmaptint "[0.05 0.07 0.10]"
+	$envmapcontrast 0.4
+	$envmapfresnel 0.0001
+
+	$phong 1 // specular
+	$phongexponenttexture "models\realistic_food_system/rfs_dishes_g"
+	$phongfresnelranges "[0.5 0.75 1]"
+	$phongtint "[0.96 0.96 0.96]"
+	$phongalbedotint 1
+	$phongalbedoboost 155
+}

@@ -1,0 +1,11 @@
+VertexLitGeneric
+{
+	$basetexture "models/realistic_food_system/rfs_wood"
+	$bumpmap "models/realistic_food_system/rfs_wood_normal"
+
+	$phong 1
+	$phongfresnelranges "[0.05 0.5 1]"
+	$phongexponent 3
+
+	$color2 "[0.57 0.57 0.57]"
+}

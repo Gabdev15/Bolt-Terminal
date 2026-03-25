@@ -1,0 +1,21 @@
+VertexLitGeneric
+{
+	$basetexture "models\realistic_food_system/rfs_burger_steak_c"
+	$bumpmap "models\realistic_food_system/rfs_burger_steak_n"
+
+	$color2 "[0.40 0.40 0.40]"
+
+	$envmap "env_cubemap"
+	$envmaptint "[0.01 0.01 0.01]"
+	$envmapfresnel 0.01
+
+	$phong 1
+	$phongexponenttexture "models\realistic_food_system/rfs_burger_steak_m"
+	$phongfresnelranges "[4 1 10]"
+	$phongboost 4
+
+	//$color2 "[0.40 0.40 0.40]"
+	//$blendtintbybasealpha 1
+
+	$basemapalphaenvmapmask 1
+}
