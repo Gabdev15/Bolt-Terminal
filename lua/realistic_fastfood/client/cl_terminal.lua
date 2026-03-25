@@ -85,7 +85,6 @@ function RFS.Terminal.ManageUsers(terminal, scroll)
     local playerNumber = 0
     for k, v in ipairs(player.GetAll()) do
         if v == RFS.LocalPlayer then continue end
-        if not RFS.FastFoodJob[team.GetName(v:Team())] then continue end
 
         local cooker = vgui.Create("DPanel", scroll)
         cooker:Dock(TOP)
@@ -270,10 +269,6 @@ function RFS.Terminal.MainMenu(terminal, scroll)
     RFS.Terminal.Information["tableToSend"] = {}
 
     for k,v in ipairs(RFS.Terminal.ParamsModules) do
-        if v.moduleName == "users" then
-            if RFS.GetOwner(terminal) != RFS.LocalPlayer then continue end
-        end
-
         local cat = vgui.Create("DPanel", scroll)
         cat:Dock(TOP)
         cat:DockMargin(0,0,0,6)

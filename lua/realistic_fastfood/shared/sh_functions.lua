@@ -84,8 +84,6 @@ end
 function RFS.CountCooker()
     local count = 0
     for k, v in ipairs(player.GetAll()) do
-        if not RFS.FastFoodJob[team.GetName(v:Team())] then continue end
-
         local service = RFS.GetNWVariables("rfs_service", v)
         if not service && RFS.ServiceSystem then continue end
 

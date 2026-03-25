@@ -59,7 +59,6 @@ end
 function TOOL:LeftClick(trace)
 	local ply = self:GetOwner()
 	if not IsValid(ply) or not ply:IsPlayer() then return end
-	if not RFS.AdminRank[ply:GetUserGroup()] then return end
 
 	local curTime = CurTime()
 	
@@ -165,7 +164,6 @@ function TOOL:Think()
 	if CLIENT then
 		local ply = self:GetOwner()
 		if not IsValid(ply) and not ply:IsPlayer() then return end
-		if not RFS.AdminRank[ply:GetUserGroup()] then return end
 
 		local ent = RFS.LocalPlayer:GetEyeTrace().Entity
 		local class = IsValid(ent) and ent:GetClass() or ""
@@ -213,9 +211,8 @@ function TOOL:Holster()
 	if CLIENT then
 		local ply = self:GetOwner()
 		if not IsValid(ply) and not ply:IsPlayer() then return end
-		if not RFS.AdminRank[ply:GetUserGroup()] then return end
-		
-		if IsValid(RFS.ToolGunEnt) then 
+
+		if IsValid(RFS.ToolGunEnt) then
 			RFS.ToolGunEnt:Remove()
 		end
 

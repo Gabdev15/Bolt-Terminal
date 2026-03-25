@@ -341,20 +341,9 @@ function RFS.SaveTerminalSettings(terminal, settingsTable, moduleName, ply)
     terminal.RFS["settings"] = terminal.RFS["settings"] or {}
     
     if moduleName == "users" then
-        --[[ Check if the player can manage users ]]
-        if IsValid(ply) then
-            if RFS.GetOwner(terminal) != ply then return end
-        end
-
         terminal.RFS["settings"]["users"] = settingsTable
 
     elseif moduleName == "quantity" then
-        --[[ Check if the player can manage users ]]
-        if IsValid(ply) then
-            local accessUsers = RFS.GetTerminalSetting(terminal, "users") or {}
-
-            if RFS.GetOwner(terminal) != ply && not accessUsers[ply:SteamID64()] then return end
-        end
 
         --[[ Make sure quantity is not upper than the number maximum ]]
         local tableToSave = terminal.RFS["settings"]["quantity"] or {}
@@ -366,13 +355,6 @@ function RFS.SaveTerminalSettings(terminal, settingsTable, moduleName, ply)
 
         terminal.RFS["settings"]["quantity"] = tableToSave
     elseif moduleName == "price" then
-        --[[ Check if the player can manage users ]]
-        if IsValid(ply) then
-            local accessUsers = RFS.GetTerminalSetting(terminal, "users") or {}
-
-            if RFS.GetOwner(terminal) != ply && not accessUsers[ply:SteamID64()] then return end
-        end
-
         --[[ Make sure price is not upper than the number maximum ]]
         local tableToSave = terminal.RFS["settings"]["price"] or {}
         for k, v in pairs(settingsTable) do
@@ -428,14 +410,6 @@ end
 --[[ Check if the player can interact with the terminal ]]
 function RFS.CanInteractTerminal(terminal, ply)
     if not IsValid(terminal) or terminal:GetClass() != "rfs_terminal" then return end
-    
-    if not RFS.FastFoodJob[team.GetName(ply:Team())] then return end
-    
-    if not terminal.spawnedByServer then
-        local ownersTable = RFS.GetTerminalSetting(terminal, "users")
-
-        if RFS.GetOwner(terminal) != ply && not ownersTable[ply:SteamID64()] then return end
-    end
 
     return true
 end
@@ -446,11 +420,6 @@ function RFS.SaveScreenSettings(ply, settingsTable, screen)
 
     screen.RFS = screen.RFS or {}
     
-    --[[ Check if the player can manage users ]]
-    if IsValid(ply) then
-        if RFS.GetOwner(screen) != ply then return end
-    end
-
     screen.RFS["settings"] = settingsTable
 
     RFS.SendScreenSettings(nil, screen)
@@ -488,14 +457,6 @@ end
 --[[ Check if the player can interact with the screen  ]]
 function RFS.CanInteractScreen(screen, ply)
     if not IsValid(screen) or screen:GetClass() != "rfs_screen" then return end
-    
-    if not RFS.FastFoodJob[team.GetName(ply:Team())] then return end
-    
-    if not screen.spawnedByServer then
-        local ownersTable = RFS.GetScreenOwners(screen)
-
-        if RFS.GetOwner(screen) != ply && not ownersTable[ply:SteamID64()] then return end
-    end
 
     return true
 end

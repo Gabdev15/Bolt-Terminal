@@ -9,11 +9,6 @@ include("shared.lua")
 local buttons = {
     ["nextStep"] = {
         ["func"] = function(ent)
-            if RFS.FastFoodJob[team.GetName(LocalPlayer():Team())] then
-                RFS.Notification(5, RFS.GetSentence("youCannotDoThatHasCooker"))
-                return 
-            end
-
             if RFS.TerminalSelected != nil && RFS.TerminalSelected != ent then
                 RFS.Notification(5, RFS.GetSentence("alreadyOnATerminal"))
                 return
@@ -135,6 +130,12 @@ local buttons = {
             RFS.Terminal.Settings(ent)
         end,
     },
+    ["chooseVoiture"] = {
+        ["func"] = function(ent, args)
+            ent.RFSInfo["currentCommand"] = ent.RFSInfo["currentCommand"] or {}
+            ent.RFSInfo["currentCommand"]["voiture"] = args[1]
+        end,
+    },
 }
 
 --[[ Init all variable of the terminal ]]
@@ -249,9 +250,15 @@ function ENT:Draw()
             
             local grey = ColorAlpha(RFS.Colors["grey"], self.lerpQuantity)
 
-            draw.DrawText(RFS.GetSentence("total"):format(RFS.formatMoney(self:GetCurrentOrderPrice())), "RFS:Font:3D2D:02", halfSizeX, 400 + self.lerpText, grey, TEXT_ALIGN_CENTER)
-            draw.DrawText(RFS.GetSentence((self.RFSInfo["stepId"] == 1) and "welcome" or "makeYourBurger"), "RFS:Font:3D2D:01", halfSizeX, 30 + self.lerpText, RFS.Colors["black"], TEXT_ALIGN_CENTER)
-            draw.DrawText(RFS.GetSentence((self.RFSInfo["stepId"] == 1) and "firstInstruction" or "composeYourBurger"), "RFS:Font:3D2D:02", halfSizeX, 70 + self.lerpText, RFS.Colors["black"], TEXT_ALIGN_CENTER)
+            if self.RFSInfo["stepId"] == 1 then
+                draw.DrawText(RFS.GetSentence("welcome"), "RFS:Font:3D2D:01", halfSizeX, 30 + self.lerpText, RFS.Colors["black"], TEXT_ALIGN_CENTER)
+            else
+                draw.DrawText(RFS.GetSentence("makeYourBurger"), "RFS:Font:3D2D:01", halfSizeX, 10 + self.lerpText, RFS.Colors["black"], TEXT_ALIGN_CENTER)
+                draw.DrawText(RFS.GetSentence("makeYourBurger2"), "RFS:Font:3D2D:01", halfSizeX, 50 + self.lerpText, RFS.Colors["black"], TEXT_ALIGN_CENTER)
+            end
+            if self.RFSInfo["stepId"] == 1 then
+                draw.DrawText(RFS.GetSentence("firstInstruction"), "RFS:Font:3D2D:02", halfSizeX, 90 + self.lerpText, RFS.Colors["black"], TEXT_ALIGN_CENTER)
+            end
             
             --[[ Only draw selected terminal to optimise ]]
             if RFS.TerminalSelected == self then
@@ -260,29 +267,39 @@ function ENT:Draw()
                 self.lerpElements = self.lerpElements or 0
                 self.lerpElements = Lerp(frameTime*5, self.lerpElements, (self.RFSInfo["stepId"] == 2) and 255 or 0)
 
-                local colorAlpha = ColorAlpha(RFS.Colors["white"], self.lerpElements)
                 local orange = ColorAlpha(RFS.Colors["orange"], self.lerpQuantity)
 
-                surface.SetDrawColor(colorAlpha)
+                --[[ Car selection (step 2) ]]
+                if self.RFSInfo["stepId"] == 2 then
+                    local carNames = {"Toyota Prius", "Nissan Leaf", "Tesla"}
+                    local selectedCar = self.RFSInfo["currentCommand"] and self.RFSInfo["currentCommand"]["voiture"]
+                    local displayName = selectedCar and carNames[selectedCar] or "-"
+                    draw.DrawText("Voiture : " .. displayName, "RFS:Font:3D2D:02", halfSizeX, 400 + self.lerpText, grey, TEXT_ALIGN_CENTER)
 
-                for k, v in ipairs(RFS.BurgerElements) do 
-                    surface.SetMaterial(v.mat)
-                    surface.DrawTexturedRect(halfSizeX-(v.size[1]/2), 60+(v.posId*40) + self.lerpText, v.size[1], v.size[2])
-                    
-                    if v.changeQuantity && v.uniqueName != "fries" && v.uniqueName != "soda" then
-                        local checkMouse = RFS.CheckMouse(self, 2, pos, ang, halfSizeX - 112, 65+(v.posId*43) + self.lerpText, 30, 30, 0.1, buttons["burgerQuantity"]["func"], {false, v.uniqueName})
-                        draw.DrawText("-", "RFS:Font:3D2D:01", halfSizeX - 100, 60+(v.posId*43) + self.lerpText, checkMouse and orange or grey, TEXT_ALIGN_CENTER)
+                    local carList = {
+                        {name = "Toyota Prius",  dispo = true},
+                        {name = "Nissan Leaf",   dispo = false},
+                        {name = "Tesla",         dispo = false},
+                    }
+                    local cardW, cardH = 220, 50
+                    local startX = halfSizeX - cardW / 2
+                    self.RFSInfo["currentCommand"] = self.RFSInfo["currentCommand"] or {}
 
-                        local checkMouse = RFS.CheckMouse(self, 2, pos, ang, halfSizeX + 85, 65+(v.posId*43) + self.lerpText, 30, 30, 0.1, buttons["burgerQuantity"]["func"], {true, v.uniqueName})
-                        draw.DrawText("+", "RFS:Font:3D2D:01", halfSizeX + 100, 60+(v.posId*43) + self.lerpText, checkMouse and orange or grey, TEXT_ALIGN_CENTER)
-
-                        self.RFSInfo["currentCommand"] = self.RFSInfo["currentCommand"] or {}
-                        self.RFSInfo["currentCommand"][v.uniqueName] = self.RFSInfo["currentCommand"][v.uniqueName] or 1
-                            
-                        draw.DrawText("("..self.RFSInfo["currentCommand"][v.uniqueName]..")", "RFS:Font:3D2D:02", halfSizeX + 120, 60+(v.posId*43) + self.lerpText, grey, TEXT_ALIGN_CENTER)
+                    for i, car in ipairs(carList) do
+                        local y = 150 + (i - 1) * 70
+                        local isSelected = self.RFSInfo["currentCommand"]["voiture"] == i
+                        if car.dispo then
+                            local checkMouse = RFS.CheckMouse(self, 2, pos, ang, startX, y + self.lerpText, cardW, cardH, 0.1, buttons["chooseVoiture"]["func"], {i})
+                            local bgColor = isSelected and RFS.Colors["orange"] or (checkMouse and ColorAlpha(RFS.Colors["orange"], 120) or ColorAlpha(RFS.Colors["grey"], 80))
+                            draw.RoundedBox(8, startX, y + self.lerpText, cardW, cardH, bgColor)
+                            draw.DrawText(car.name, "RFS:Font:3D2D:03", halfSizeX, y + 13 + self.lerpText, RFS.Colors["black"], TEXT_ALIGN_CENTER)
+                        else
+                            draw.RoundedBox(8, startX, y + self.lerpText, cardW, cardH, ColorAlpha(RFS.Colors["grey"], 40))
+                            draw.DrawText(car.name .. " - Bientot disponible", "RFS:Font:3D2D:04", halfSizeX, y + 18 + self.lerpText, ColorAlpha(RFS.Colors["black"], 120), TEXT_ALIGN_CENTER)
+                        end
                     end
                 end
-                
+
                 --[[ Choose fries and quantity (step 3) ]] 
                 self.lerpExtra = self.lerpExtra or 0
                 self.lerpExtra = Lerp(frameTime*5, self.lerpExtra, (self.RFSInfo["stepId"] == 3 and 180 or 0))
@@ -405,7 +422,7 @@ function ENT:Draw()
                     accessUsers = RFS.Terminal.GetTerminalSetting(self, "users") or {}
                 end
 
-                if (RFS.GetOwner(self) == RFS.LocalPlayer or accessUsers[RFS.LocalPlayer:SteamID64()]) && RFS.FastFoodJob[team.GetName(RFS.LocalPlayer:Team())] then
+                if true then
                     local checkMouse = RFS.CheckMouse(self, 0, pos, ang, 300, 20, 45, 45, 0.1, buttons["settings"]["func"])
             
                     self.lerpRotated = self.lerpRotated or 0

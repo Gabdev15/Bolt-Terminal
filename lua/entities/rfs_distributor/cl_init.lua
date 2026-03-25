@@ -9,11 +9,6 @@ include("shared.lua")
 local buttons = {
     ["nextStep"] = {
         ["func"] = function(ent)
-            if RFS.FastFoodJob[team.GetName(LocalPlayer():Team())] then
-                RFS.Notification(5, RFS.GetSentence("youCannotDoThatHasCooker"))
-                return 
-            end
-
             if RFS.CountCookerDistributor() > 0 then
                 RFS.Notification(5, RFS.GetSentence("noCooker"))
                 return

@@ -71,7 +71,7 @@ function RFS.Screen.Settings(screen)
     RFS.ScreenSettings[screenIndex] = RFS.ScreenSettings[screenIndex] or {}
 
     for k, v in ipairs(player.GetAll()) do
-        if not RFS.FastFoodJob[team.GetName(v:Team())] or v == RFS.LocalPlayer then continue end
+        if v == RFS.LocalPlayer then continue end
 
         local cooker = vgui.Create("DPanel", scroll)
         cooker:Dock(TOP)

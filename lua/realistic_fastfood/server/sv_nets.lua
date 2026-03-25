@@ -22,11 +22,6 @@ net.Receive("RFS:MainNet", function(len, ply)
 
     --[[ Link a screen to a terminal ]]
     if uInt == 1 then
-        if not RFS.FastFoodJob[team.GetName(ply:Team())] then
-            ply:RFSNotification(5, RFS.GetSentence("notCooker"))
-            return 
-        end
-
         local screen = net.ReadEntity()
         local terminal = net.ReadEntity()
 
@@ -43,11 +38,6 @@ net.Receive("RFS:MainNet", function(len, ply)
         
     --[[ Send all linked screen of the terminal ]]
     elseif uInt == 2 then
-        if not RFS.FastFoodJob[team.GetName(ply:Team())] then
-            ply:RFSNotification(5, RFS.GetSentence("notCooker"))
-            return 
-        end
-
         local screen = ply:GetEyeTrace().Entity
         if not IsValid(screen) then return end
 
@@ -60,11 +50,6 @@ net.Receive("RFS:MainNet", function(len, ply)
 
         if not ply:RFSCheckNearEntity(terminal, "rfs_terminal", 100) then
             ply:RFSNotification(5, RFS.GetSentence("tooFar"))
-            return 
-        end
-
-        if RFS.CountScreenLinked(terminal) <= 0 then
-            ply:RFSNotification(5, RFS.GetSentence("unlinkedScreen"))
             return
         end
 
@@ -80,11 +65,6 @@ net.Receive("RFS:MainNet", function(len, ply)
 
     --[[ Create the order ]]
     elseif uInt == 4 then
-        if RFS.FastFoodJob[team.GetName(ply:Team())] then
-            ply:RFSNotification(5, RFS.GetSentence("youCannotDoThatHasCooker"))
-            return 
-        end
-        
         local terminal = ply:GetEyeTrace().Entity
         if not IsValid(terminal) then return end
 
@@ -148,11 +128,6 @@ net.Receive("RFS:MainNet", function(len, ply)
         end
     --[[ Claim order on the screen ]]
     elseif uInt == 5 then
-        if not RFS.FastFoodJob[team.GetName(ply:Team())] then
-            ply:RFSNotification(5, RFS.GetSentence("notCooker"))
-            return 
-        end
-
         local terminalIndex = net.ReadUInt(16)
         local terminal = Entity(terminalIndex)
         if not IsValid(terminal) then return end
@@ -173,11 +148,6 @@ net.Receive("RFS:MainNet", function(len, ply)
 
     --[[ Save settings of the terminal ]]
     elseif uInt == 6 then
-        if not RFS.FastFoodJob[team.GetName(ply:Team())] then
-            ply:RFSNotification(5, RFS.GetSentence("notCooker"))
-            return 
-        end
-
         local terminal = net.ReadEntity()
         if not IsValid(terminal) then return end
 
@@ -210,11 +180,6 @@ net.Receive("RFS:MainNet", function(len, ply)
 
     --[[ Order on the distributor ]]
     elseif uInt == 7 then
-        if RFS.FastFoodJob[team.GetName(ply:Team())] then
-            ply:RFSNotification(5, RFS.GetSentence("youCannotDoThatHasCooker"))
-            return 
-        end
-
         if RFS.CountCookerDistributor() > 0 then
             ply:RFSNotification(5, RFS.GetSentence("noCooker"))
             return
@@ -281,11 +246,6 @@ net.Receive("RFS:MainNet", function(len, ply)
         end
     --[[ Save screen settings ]]
     elseif uInt == 8 then
-        if not RFS.FastFoodJob[team.GetName(ply:Team())] then
-            ply:RFSNotification(5, RFS.GetSentence("notCooker"))
-            return 
-        end
-
         local screen = net.ReadEntity()
         if not IsValid(screen) then return end
 
@@ -316,11 +276,6 @@ net.Receive("RFS:MainNet", function(len, ply)
 
     --[[ Change status of the dishes ]]
     elseif uInt == 9 then
-        if not RFS.FastFoodJob[team.GetName(ply:Team())] then
-            ply:RFSNotification(5, RFS.GetSentence("notCooker"))
-            return 
-        end
-
         local dishes = net.ReadEntity()
         if not IsValid(dishes) then return end
 
@@ -335,8 +290,6 @@ net.Receive("RFS:MainNet", function(len, ply)
         RFS.Cooking.DishesChangeStatus(dishes)
     --[[ Link screen to the terminal with the toolgun ]]
     elseif uInt == 10 then
-        if not RFS.AdminRank[ply:GetUserGroup()] then return end
-
         local baseEnt = net.ReadEntity()
         local entLinked = net.ReadEntity()
         if not IsValid(baseEnt) or not IsValid(entLinked) then return end
@@ -372,11 +325,6 @@ net.Receive("RFS:Cooking", function(len, ply)
 
     --[[ Do the serverside action when the player left click with an item ]]
     if uInt == 1 then
-        if not RFS.FastFoodJob[team.GetName(ply:Team())] then
-            ply:RFSNotification(5, RFS.GetSentence("notCooker"))
-            return 
-        end
-
         local ent = net.ReadEntity()
         if not IsValid(ent) then return end
 
@@ -421,11 +369,6 @@ net.Receive("RFS:Cooking", function(len, ply)
 
     --[[ Do the clientside action to pos items ]]
     elseif uInt == 2 then
-        if not RFS.FastFoodJob[team.GetName(ply:Team())] then
-            ply:RFSNotification(5, RFS.GetSentence("notCooker"))
-            return
-        end
-
         local ent = net.ReadEntity()
         if not IsValid(ent) then return end
 
@@ -463,20 +406,11 @@ net.Receive("RFS:Cooking", function(len, ply)
 
         RFS.Cooking.GetIntoBag(bag, number, ply)
     elseif uInt == 4 then
-        if not RFS.FastFoodJob[team.GetName(ply:Team())] then
-            ply:RFSNotification(5, RFS.GetSentence("notCooker"))
-            return 
-        end
-
         local ent = net.ReadEntity()
         if not IsValid(ent) then return end
 
         ent:ResetSequence("idle")
     elseif uInt == 5 then
-        if not RFS.FastFoodJob[team.GetName(ply:Team())] then
-            ply:RFSNotification(5, RFS.GetSentence("notCooker"))
-            return 
-        end
 
         if not RFS.ServiceSystem then return end
 

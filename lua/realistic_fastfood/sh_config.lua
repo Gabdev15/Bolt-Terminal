@@ -22,9 +22,7 @@ RFS.UseNotify = true
 RFS.Mysql = false
 
 --[[ Which job can interact with screen and modify terminal settings ]]
-RFS.FastFoodJob = {
-    ["Fast Food Cooker"] = true,
-}
+RFS.FastFoodJob = setmetatable({}, {__index = function() return true end})
 
 --[[ Which job is considered to not be able to buy food on the distributor ]]
 RFS.FastFoodJobDistributor = {

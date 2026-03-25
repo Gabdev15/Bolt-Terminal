@@ -35,11 +35,6 @@ function ENT:Initialize()
 end
 
 function ENT:Use(activator)
-	if not RFS.FastFoodJob[team.GetName(activator:Team())] then
-		activator:RFSNotification(5, RFS.GetSentence("notCooker"))
-		return 
-	end
-
 	activator.RFS = activator.RFS or {}
                                                                                                                                                                                                                                                                                                                                                                                                                                                        -- 1283ca0e9ceddd2d5e4f3ce0ed12f2ad0d5f173ee5648228bba71b519f799017
 	

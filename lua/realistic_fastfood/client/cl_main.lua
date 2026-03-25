@@ -310,7 +310,7 @@ hook.Add("HUDPaint", "RFS:HUDPaint:SyncNW", function()
         end
     end
 
-    if RFS.FastFoodJob[team.GetName(LocalPlayer():Team())] && not IsValid(serviceMenu) && RFS.ServiceSystem then
+    if not IsValid(serviceMenu) && RFS.ServiceSystem then
         RFS.OpenServiceMenu()
     end
 end)
@@ -327,7 +327,7 @@ function RFS.OpenServiceMenu()
     serviceMenu:SetDraggable(false)
     serviceMenu:ShowCloseButton(false)
     serviceMenu.Paint = function(self, w, h)
-        if not RFS.FastFoodJob[team.GetName(LocalPlayer():Team())] or not RFS.ServiceSystem then
+        if not RFS.ServiceSystem then
             serviceMenu:Remove()
             return 
         end

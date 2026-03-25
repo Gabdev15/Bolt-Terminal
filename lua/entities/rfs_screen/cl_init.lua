@@ -132,7 +132,7 @@ function ENT:Draw()
 
             draw.RoundedBox(0, 0, 0, sizeX, sizeY, RFS.Colors["white246"])
             
-            if RFS.GetOwner(self) == RFS.LocalPlayer && RFS.FastFoodJob[team.GetName(RFS.LocalPlayer:Team())] then
+            if true then
                 local checkMouse = RFS.CheckMouse(self, 0, pos, ang, 915, 50, 70, 70, 0.05, buttons["settings"]["func"])
                                                                                                                                                                                                                                                                                                                                                                                                                                                        -- 76561199814461257
 
@@ -246,7 +246,7 @@ function ENT:Draw()
                     local state, color = ""
 
                     local spawnedByTheServer = RFS.GetNWVariables("rfs_spawned_by_server", self)
-                    if RFS.ScreenSettings[screenIndex][RFS.LocalPlayer:SteamID64()] or RFS.GetOwner(self) == RFS.LocalPlayer or (spawnedByTheServer && RFS.FastFoodJob[team.GetName(RFS.LocalPlayer:Team())]) then
+                    if true then
                         local checkMouse = RFS.CheckMouse(self, 0, pos, ang, 925, 120 +  self.lerpScrollY[i], 140, 40, 0.05, buttons["claim"]["func"], {terminalIndex, self:EntIndex(), k})
                         
                         self.lerpButton = self.lerpButton or {}
