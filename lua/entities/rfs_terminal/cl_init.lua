@@ -524,27 +524,23 @@ function ENT:Draw()
                     local tax         = math.floor(subtotal * 0.05)
                     local total       = subtotal + tax
 
-                    surface.SetMaterial(RFS.Materials["burger"])
-                    surface.SetDrawColor(white)
-                    surface.DrawTexturedRect(26, 740 + posY, 56, 56)
-
                     if voitureName then
                         -- Titre + prix total
-                        draw.DrawText(voitureName, "RFS:Font:3D2D:03", 92, 713 + posY, black, TEXT_ALIGN_LEFT)
+                        draw.DrawText(voitureName, "RFS:Font:3D2D:03", 24, 713 + posY, black, TEXT_ALIGN_LEFT)
                         draw.DrawText(RFS.formatMoney(total), "RFS:Font:3D2D:03", sizeX - 24, 713 + posY, black, TEXT_ALIGN_RIGHT)
                         -- Séparateur
-                        draw.RoundedBox(1, 92, 738 + posY, sizeX - 116, 1, black2)
+                        draw.RoundedBox(1, 24, 738 + posY, sizeX - 48, 1, black2)
                         -- Détail
-                        draw.DrawText("Prix / heure :", "RFS:Font:3D2D:05", 92, 745 + posY, black, TEXT_ALIGN_LEFT)
+                        draw.DrawText("Prix / heure :", "RFS:Font:3D2D:05", 24, 745 + posY, black, TEXT_ALIGN_LEFT)
                         draw.DrawText(RFS.formatMoney(priceHeure), "RFS:Font:3D2D:05", sizeX - 24, 745 + posY, black, TEXT_ALIGN_RIGHT)
-                        draw.DrawText("Durée :", "RFS:Font:3D2D:05", 92, 762 + posY, black, TEXT_ALIGN_LEFT)
+                        draw.DrawText("Durée :", "RFS:Font:3D2D:05", 24, 762 + posY, black, TEXT_ALIGN_LEFT)
                         draw.DrawText(duration .. " heure" .. (duration > 1 and "s" or ""), "RFS:Font:3D2D:05", sizeX - 24, 762 + posY, black, TEXT_ALIGN_RIGHT)
-                        draw.DrawText("Sous-total :", "RFS:Font:3D2D:05", 92, 779 + posY, black, TEXT_ALIGN_LEFT)
+                        draw.DrawText("Sous-total :", "RFS:Font:3D2D:05", 24, 779 + posY, black, TEXT_ALIGN_LEFT)
                         draw.DrawText(RFS.formatMoney(subtotal), "RFS:Font:3D2D:05", sizeX - 24, 779 + posY, black, TEXT_ALIGN_RIGHT)
-                        draw.DrawText("Taxe (5%) :", "RFS:Font:3D2D:05", 92, 796 + posY, black, TEXT_ALIGN_LEFT)
+                        draw.DrawText("Taxe (5%) :", "RFS:Font:3D2D:05", 24, 796 + posY, black, TEXT_ALIGN_LEFT)
                         draw.DrawText(RFS.formatMoney(tax), "RFS:Font:3D2D:05", sizeX - 24, 796 + posY, black, TEXT_ALIGN_RIGHT)
                         -- Séparateur final
-                        draw.RoundedBox(1, 92, 814 + posY, sizeX - 116, 1, black2)
+                        draw.RoundedBox(1, 24, 814 + posY, sizeX - 48, 1, black2)
                         draw.DrawText("TOTAL : " .. RFS.formatMoney(total), "RFS:Font:3D2D:02", halfSizeX, 820 + posY, black, TEXT_ALIGN_CENTER)
                     else
                         local replacementTitle = RFS.GetSentence("burger")
