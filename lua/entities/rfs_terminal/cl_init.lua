@@ -506,103 +506,6 @@ function ENT:Draw()
             --[[ Bottom line ]]
             draw.RoundedBox(8, halfSizeX-150, 430, 300, 1, RFS.Colors["grey"])
 
-            --[[ Truck loader overlay (step 5 payment) ]]
-            if self.loaderActive then
-                local t = CurTime()
-                local elapsed = t - (self.loaderStartTime or t)
-
-                -- Dark semi-transparent overlay over entire panel
-                draw.RoundedBox(0, 0, 0, sizeX, sizeY, Color(20, 20, 20, 230))
-
-                -- Layout anchors
-                local roadY = 310
-                local bounce = math.sin(t * 10) * 4
-
-                -- === ROAD ===
-                draw.RoundedBox(0, 0, roadY, sizeX, 38, Color(70, 70, 70))
-                -- Center dashed line
-                local dashOffset = (t * 220) % 60
-                for i = -1, 8 do
-                    local dx = sizeX - (i * 60 + dashOffset)
-                    draw.RoundedBox(2, dx, roadY + 16, 36, 7, Color(210, 210, 210, 180))
-                end
-                -- Road edges
-                draw.RoundedBox(0, 0, roadY, sizeX, 3, Color(200, 180, 50))
-                draw.RoundedBox(0, 0, roadY + 35, sizeX, 3, Color(200, 180, 50))
-
-                -- === LAMP POST (scrolling right to left) ===
-                local lampCycle = sizeX + 80
-                local lampX = sizeX - ((t * 130) % lampCycle)
-                draw.RoundedBox(2, lampX + 1, roadY - 110, 5, 110, Color(110, 110, 110))
-                draw.RoundedBox(2, lampX - 22, roadY - 112, 28, 5, Color(110, 110, 110))
-                draw.RoundedBox(3, lampX - 32, roadY - 124, 18, 14, Color(255, 230, 100))
-
-                -- === TRUCK ===
-                local truckX = halfSizeX - 80
-                local truckY = roadY - 68 + bounce
-
-                -- Cargo body
-                draw.RoundedBox(5, truckX, truckY, 115, 58, Color(50, 187, 120))
-                -- Body shadow/depth
-                draw.RoundedBox(5, truckX + 2, truckY + 2, 115, 58, Color(40, 160, 100, 80))
-                draw.RoundedBox(5, truckX, truckY, 115, 58, Color(50, 187, 120))
-                -- "BOLT" text on cargo
-                draw.DrawText("BOLT", "RFS:Font:3D2D:04", truckX + 57, truckY + 18, RFS.Colors["white"], TEXT_ALIGN_CENTER)
-
-                -- Cabin
-                draw.RoundedBox(5, truckX + 113, truckY + 10, 46, 48, Color(38, 145, 90))
-                -- Cabin window
-                draw.RoundedBox(3, truckX + 120, truckY + 15, 26, 20, Color(160, 230, 210, 200))
-                -- Front bumper
-                draw.RoundedBox(2, truckX + 152, truckY + 44, 8, 14, Color(60, 60, 60))
-                -- Headlight
-                draw.RoundedBox(2, truckX + 154, truckY + 34, 5, 8, Color(255, 240, 150))
-
-                -- === WHEELS (filled circle polys) ===
-                local wR = 15
-                local wY = roadY + bounce + 2
-
-                local function drawWheel(wx, wy)
-                    -- Tire
-                    surface.SetDrawColor(Color(40, 40, 40))
-                    local pts = {}
-                    for a = 0, 360, 12 do
-                        pts[#pts+1] = {x = wx + math.cos(math.rad(a)) * wR, y = wy + math.sin(math.rad(a)) * wR}
-                    end
-                    surface.DrawPoly(pts)
-                    -- Rim
-                    surface.SetDrawColor(Color(190, 190, 190))
-                    local rim = {}
-                    for a = 0, 360, 12 do
-                        rim[#rim+1] = {x = wx + math.cos(math.rad(a)) * (wR - 5), y = wy + math.sin(math.rad(a)) * (wR - 5)}
-                    end
-                    surface.DrawPoly(rim)
-                    -- Hub
-                    surface.SetDrawColor(Color(80, 80, 80))
-                    local hub = {}
-                    for a = 0, 360, 12 do
-                        hub[#hub+1] = {x = wx + math.cos(math.rad(a)) * 3, y = wy + math.sin(math.rad(a)) * 3}
-                    end
-                    surface.DrawPoly(hub)
-                end
-
-                drawWheel(truckX + 26, wY)
-                drawWheel(truckX + 120, wY)
-
-                -- === LOADING TEXT + PROGRESS BAR ===
-                local dotCount = math.floor(elapsed * 2) % 4
-                local dots = string.rep(".", dotCount)
-                draw.DrawText("Paiement en cours" .. dots, "RFS:Font:3D2D:03", halfSizeX, roadY + 55, RFS.Colors["white"], TEXT_ALIGN_CENTER)
-
-                -- Progress bar (4 second fill)
-                local progress = math.Clamp(elapsed / 4, 0, 1)
-                local barW = 240
-                local barX = halfSizeX - barW / 2
-                local barY = roadY + 82
-                draw.RoundedBox(4, barX, barY, barW, 8, Color(60, 60, 60))
-                draw.RoundedBox(4, barX, barY, barW * progress, 8, Color(50, 187, 120))
-            end
-
             self:DrawMouse(0.1)
 
         render.SetStencilEnable(false)
@@ -731,6 +634,98 @@ function ENT:Draw()
 
             render.SetStencilEnable(false)
         end
+
+        --[[ Truck loader — dessiné EN DERNIER pour être au premier plan ]]
+        if self.loaderActive then
+            local t = CurTime()
+            local elapsed = t - (self.loaderStartTime or t)
+
+            -- Nouveau stencil clippé au panneau (0,0,sizeX,sizeY)
+            render.SetStencilWriteMask(0xFF)
+            render.SetStencilTestMask(0xFF)
+            render.SetStencilReferenceValue(0)
+            render.SetStencilPassOperation(STENCIL_KEEP)
+            render.SetStencilZFailOperation(STENCIL_KEEP)
+            render.ClearStencil()
+
+            render.SetStencilEnable(true)
+            render.SetStencilReferenceValue(1)
+            render.SetStencilCompareFunction(STENCIL_NEVER)
+            render.SetStencilFailOperation(STENCIL_REPLACE)
+                draw.RoundedBox(0, 0, 0, sizeX, sizeY, RFS.Colors["white"])
+            render.SetStencilCompareFunction(STENCIL_EQUAL)
+            render.SetStencilFailOperation(STENCIL_KEEP)
+
+                -- Fond sombre sur tout le panneau
+                draw.RoundedBox(0, 0, 0, sizeX, sizeY, Color(20, 20, 20, 235))
+
+                local roadY = 310
+                local bounce = math.sin(t * 10) * 4
+
+                -- === ROUTE ===
+                draw.RoundedBox(0, 0, roadY, sizeX, 38, Color(70, 70, 70))
+                local dashOffset = (t * 220) % 60
+                for i = -1, 8 do
+                    local dx = sizeX - (i * 60 + dashOffset)
+                    draw.RoundedBox(2, dx, roadY + 16, 36, 7, Color(210, 210, 210, 180))
+                end
+                draw.RoundedBox(0, 0, roadY, sizeX, 3, Color(200, 180, 50))
+                draw.RoundedBox(0, 0, roadY + 35, sizeX, 3, Color(200, 180, 50))
+
+                -- === LAMPADAIRE (défile droite → gauche) ===
+                local lampX = sizeX - ((t * 130) % (sizeX + 80))
+                draw.RoundedBox(2, lampX + 1, roadY - 110, 5, 110, Color(110, 110, 110))
+                draw.RoundedBox(2, lampX - 22, roadY - 112, 28, 5, Color(110, 110, 110))
+                draw.RoundedBox(3, lampX - 32, roadY - 124, 18, 14, Color(255, 230, 100))
+
+                -- === CAMION ===
+                local truckX = halfSizeX - 80
+                local truckY = roadY - 68 + bounce
+                -- Caisse
+                draw.RoundedBox(5, truckX, truckY, 115, 58, Color(50, 187, 120))
+                draw.DrawText("BOLT", "RFS:Font:3D2D:04", truckX + 57, truckY + 18, RFS.Colors["white"], TEXT_ALIGN_CENTER)
+                -- Cabine
+                draw.RoundedBox(5, truckX + 113, truckY + 10, 46, 48, Color(38, 145, 90))
+                -- Vitre
+                draw.RoundedBox(3, truckX + 120, truckY + 15, 26, 20, Color(160, 230, 210, 200))
+                -- Pare-choc
+                draw.RoundedBox(2, truckX + 152, truckY + 44, 8, 14, Color(60, 60, 60))
+                -- Phare
+                draw.RoundedBox(2, truckX + 154, truckY + 34, 5, 8, Color(255, 240, 150))
+
+                -- === ROUES ===
+                local wR = 15
+                local wY = roadY + bounce + 2
+                local function drawWheel(wx, wy)
+                    surface.SetDrawColor(Color(40, 40, 40))
+                    local pts = {}
+                    for a = 0, 360, 12 do pts[#pts+1] = {x = wx + math.cos(math.rad(a))*wR, y = wy + math.sin(math.rad(a))*wR} end
+                    surface.DrawPoly(pts)
+                    surface.SetDrawColor(Color(190, 190, 190))
+                    local rim = {}
+                    for a = 0, 360, 12 do rim[#rim+1] = {x = wx + math.cos(math.rad(a))*(wR-5), y = wy + math.sin(math.rad(a))*(wR-5)} end
+                    surface.DrawPoly(rim)
+                    surface.SetDrawColor(Color(80, 80, 80))
+                    local hub = {}
+                    for a = 0, 360, 12 do hub[#hub+1] = {x = wx + math.cos(math.rad(a))*3, y = wy + math.sin(math.rad(a))*3} end
+                    surface.DrawPoly(hub)
+                end
+                drawWheel(truckX + 26, wY)
+                drawWheel(truckX + 120, wY)
+
+                -- === TEXTE + BARRE DE PROGRESSION ===
+                local dots = string.rep(".", math.floor(elapsed * 2) % 4)
+                draw.DrawText("Paiement en cours" .. dots, "RFS:Font:3D2D:03", halfSizeX, roadY + 55, RFS.Colors["white"], TEXT_ALIGN_CENTER)
+                local progress = math.Clamp(elapsed / 4, 0, 1)
+                local barW, barY2 = 240, roadY + 82
+                draw.RoundedBox(4, halfSizeX - barW/2, barY2, barW, 8, Color(60, 60, 60))
+                draw.RoundedBox(4, halfSizeX - barW/2, barY2, barW * progress, 8, Color(50, 187, 120))
+
+                self:DrawMouse(0.1)
+
+            render.SetStencilEnable(false)
+        end
+
     RFS.End3D2D()
 
     if distance > 25000 then
