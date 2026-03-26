@@ -579,7 +579,7 @@ function ENT:Draw()
                     surface.DrawTexturedRect(bX + 10, bY + 5, 30, 30)
 
                     -- Texte "Se connecter avec Bolt"
-                    draw.DrawText("Se connecter avec Bolt", "RFS:Font:3D2D:04", bX + 48, bY + 11, RFS.Colors["white"], TEXT_ALIGN_LEFT)
+                    draw.DrawText("Se connecter avec Bolt", "RFS:Font:3D2D:Bolt", bX + 48, bY + 12, RFS.Colors["white"], TEXT_ALIGN_LEFT)
                 end
 
                 self:DrawMouse(0.1)

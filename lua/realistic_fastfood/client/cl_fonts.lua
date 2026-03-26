@@ -123,6 +123,17 @@ function RFS.LoadFonts()
         antialias = true,
     })
 
+    surface.CreateFont("RFS:Font:3D2D:Bolt", {
+        font = "Insaniburger with Cheese",
+        extended = false,
+        size = 12,
+        italic = false,
+        weight = 0,
+        blursize = 0,
+        scanlines = 0,
+        antialias = true,
+    })
+
     surface.CreateFont("RFS:Font:3D2D:05", {
         font = "Insaniburger with Cheese",
         extended = false,
