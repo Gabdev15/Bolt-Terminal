@@ -635,19 +635,18 @@ function ENT:Draw()
             render.SetStencilEnable(false)
         end
 
-        --[[ Truck loader — dessiné EN DERNIER pour être au premier plan ]]
+        --[[ Truck loader Uiverse (vinodjangid07) — dessiné EN DERNIER, au premier plan ]]
         if self.loaderActive then
-            local t = CurTime()
+            local t      = CurTime()
             local elapsed = t - (self.loaderStartTime or t)
 
-            -- Nouveau stencil clippé au panneau (0,0,sizeX,sizeY)
+            -- Stencil clippé au panneau terminal
             render.SetStencilWriteMask(0xFF)
             render.SetStencilTestMask(0xFF)
             render.SetStencilReferenceValue(0)
             render.SetStencilPassOperation(STENCIL_KEEP)
             render.SetStencilZFailOperation(STENCIL_KEEP)
             render.ClearStencil()
-
             render.SetStencilEnable(true)
             render.SetStencilReferenceValue(1)
             render.SetStencilCompareFunction(STENCIL_NEVER)
@@ -656,70 +655,148 @@ function ENT:Draw()
             render.SetStencilCompareFunction(STENCIL_EQUAL)
             render.SetStencilFailOperation(STENCIL_KEEP)
 
-                -- Fond sombre sur tout le panneau
-                draw.RoundedBox(0, 0, 0, sizeX, sizeY, Color(20, 20, 20, 235))
+                -- Fond blanc (comme le CSS original — fond page blanche)
+                draw.RoundedBox(0, 0, 0, sizeX, sizeY, Color(255, 255, 255, 250))
 
-                local roadY = 310
-                local bounce = math.sin(t * 10) * 4
+                -- ============================================================
+                -- CONSTANTES DE LAYOUT
+                -- SVG truck viewBox = 198×93, affiché à 195px → scale ≈ 0.985
+                -- ============================================================
+                local s      = 195.0 / 198.0   -- ~0.985 : SVG unit → pixel
+                local roadY  = 325              -- Y de la ligne de route
+                local truckH = 93 * s           -- hauteur affichée du SVG camion (~91.6px)
+                local tx     = halfSizeX - 97.5 -- bord gauche du SVG (195px centré)
+                local ty0    = roadY - 6 - truckH -- bord haut du SVG (margin-bottom:6px)
 
-                -- === ROUTE ===
-                draw.RoundedBox(0, 0, roadY, sizeX, 38, Color(70, 70, 70))
-                local dashOffset = (t * 220) % 60
-                for i = -1, 8 do
-                    local dx = sizeX - (i * 60 + dashOffset)
-                    draw.RoundedBox(2, dx, roadY + 16, 36, 7, Color(210, 210, 210, 180))
-                end
-                draw.RoundedBox(0, 0, roadY, sizeX, 3, Color(200, 180, 50))
-                draw.RoundedBox(0, 0, roadY + 35, sizeX, 3, Color(200, 180, 50))
+                -- Bounce: 0→3px→0 sur 1 s (keyframes motion CSS)
+                local bounce = 3 * (1 - math.cos(t * math.pi * 2)) / 2
+                local ty = ty0 + bounce  -- uniquement sur la caisse, pas les roues
 
-                -- === LAMPADAIRE (défile droite → gauche) ===
-                local lampX = sizeX - ((t * 130) % (sizeX + 80))
-                draw.RoundedBox(2, lampX + 1, roadY - 110, 5, 110, Color(110, 110, 110))
-                draw.RoundedBox(2, lampX - 22, roadY - 112, 28, 5, Color(110, 110, 110))
-                draw.RoundedBox(3, lampX - 32, roadY - 124, 18, 14, Color(255, 230, 100))
-
-                -- === CAMION ===
-                local truckX = halfSizeX - 80
-                local truckY = roadY - 68 + bounce
-                -- Caisse
-                draw.RoundedBox(5, truckX, truckY, 115, 58, Color(50, 187, 120))
-                draw.DrawText("BOLT", "RFS:Font:3D2D:04", truckX + 57, truckY + 18, RFS.Colors["white"], TEXT_ALIGN_CENTER)
-                -- Cabine
-                draw.RoundedBox(5, truckX + 113, truckY + 10, 46, 48, Color(38, 145, 90))
-                -- Vitre
-                draw.RoundedBox(3, truckX + 120, truckY + 15, 26, 20, Color(160, 230, 210, 200))
-                -- Pare-choc
-                draw.RoundedBox(2, truckX + 152, truckY + 44, 8, 14, Color(60, 60, 60))
-                -- Phare
-                draw.RoundedBox(2, truckX + 154, truckY + 34, 5, 8, Color(255, 240, 150))
-
-                -- === ROUES ===
-                local wR = 15
-                local wY = roadY + bounce + 2
-                local function drawWheel(wx, wy)
-                    surface.SetDrawColor(Color(40, 40, 40))
+                -- helper : dessine un cercle rempli
+                local function circle(cx, cy, r, col)
+                    surface.SetDrawColor(col)
                     local pts = {}
-                    for a = 0, 360, 12 do pts[#pts+1] = {x = wx + math.cos(math.rad(a))*wR, y = wy + math.sin(math.rad(a))*wR} end
+                    for a = 0, 354, 6 do
+                        pts[#pts+1] = {x = cx + math.cos(math.rad(a))*r, y = cy + math.sin(math.rad(a))*r}
+                    end
                     surface.DrawPoly(pts)
-                    surface.SetDrawColor(Color(190, 190, 190))
-                    local rim = {}
-                    for a = 0, 360, 12 do rim[#rim+1] = {x = wx + math.cos(math.rad(a))*(wR-5), y = wy + math.sin(math.rad(a))*(wR-5)} end
-                    surface.DrawPoly(rim)
-                    surface.SetDrawColor(Color(80, 80, 80))
-                    local hub = {}
-                    for a = 0, 360, 12 do hub[#hub+1] = {x = wx + math.cos(math.rad(a))*3, y = wy + math.sin(math.rad(a))*3} end
-                    surface.DrawPoly(hub)
                 end
-                drawWheel(truckX + 26, wY)
-                drawWheel(truckX + 120, wY)
 
-                -- === TEXTE + BARRE DE PROGRESSION ===
-                local dots = string.rep(".", math.floor(elapsed * 2) % 4)
-                draw.DrawText("Paiement en cours" .. dots, "RFS:Font:3D2D:03", halfSizeX, roadY + 55, RFS.Colors["white"], TEXT_ALIGN_CENTER)
-                local progress = math.Clamp(elapsed / 4, 0, 1)
-                local barW, barY2 = 240, roadY + 82
-                draw.RoundedBox(4, halfSizeX - barW/2, barY2, barW, 8, Color(60, 60, 60))
-                draw.RoundedBox(4, halfSizeX - barW/2, barY2, barW * progress, 8, Color(50, 187, 120))
+                -- ============================================================
+                -- CAISSE PRINCIPALE (rect x=6.5 y=1.5 w=121 h=90 fill=#DFDFDF stroke=#282828 sw=3)
+                -- ============================================================
+                local cx0  = tx + 6.5*s
+                local cy0  = ty + 1.5*s
+                local cw0  = 121*s
+                local ch0  = 90*s
+                draw.RoundedBox(3, cx0-1.5, cy0-1.5, cw0+3, ch0+3, Color(40,40,40))
+                draw.RoundedBox(3, cx0, cy0, cw0, ch0, Color(223,223,223))
+
+                -- Petite rect arrière (x=1 y=84 w=6 h=4 fill=#DFDFDF stroke=#282828 sw=2)
+                draw.RoundedBox(2, tx+1*s-1,  ty+84*s-1, 6*s+2, 4*s+2, Color(40,40,40))
+                draw.RoundedBox(2, tx+1*s,    ty+84*s,   6*s,   4*s,   Color(223,223,223))
+
+                -- ============================================================
+                -- CABINE ROUGE (path ≈ x=132.5 y=22.5 w=60 h=69 fill=#F83D3D stroke=#282828 sw=3)
+                -- ============================================================
+                local cabx = tx + 132.5*s
+                local caby = ty + 22.5*s
+                local cabw = 60*s
+                local cabh = 69*s
+                draw.RoundedBox(3, cabx-1.5, caby-1.5, cabw+3, cabh+3, Color(40,40,40))
+                draw.RoundedBox(3, cabx, caby, cabw, cabh, Color(248,61,61))
+
+                -- ============================================================
+                -- VITRE (path ≈ x=143.5 y=33.5 w=47 h=22 fill=#7D7C7C stroke=#282828 sw=3)
+                -- ============================================================
+                local wx0 = tx + 143.5*s
+                local wy0 = ty + 33.5*s
+                local ww0 = 47*s
+                local wh0 = 22*s
+                draw.RoundedBox(2, wx0-1, wy0-1, ww0+2, wh0+2, Color(40,40,40))
+                draw.RoundedBox(2, wx0, wy0, ww0, wh0, Color(125,124,124))
+
+                -- ============================================================
+                -- PHARE (rect x=187 y=63 w=5 h=7 fill=#FFFCAB stroke=#282828 sw=2)
+                -- ============================================================
+                draw.RoundedBox(1, tx+187*s-1, ty+63*s-1, 5*s+2, 7*s+2, Color(40,40,40))
+                draw.RoundedBox(1, tx+187*s,   ty+63*s,   5*s,   7*s,   Color(255,252,171))
+
+                -- ============================================================
+                -- PARE-CHOC AVANT (rect x=193 y=81 w=4 h=11 fill=#282828 sw=2)
+                -- ============================================================
+                draw.RoundedBox(1, tx+193*s, ty+81*s, 4*s, 11*s, Color(40,40,40))
+
+                -- Petite roue de secours / enjoliveur (path circle ≈ cx=146.5 cy=65 r=3.5)
+                circle(tx + 146.5*s, ty + 65*s, 3.5*s, Color(40,40,40))
+
+                -- ============================================================
+                -- PNEUS  (SVG 30×30 viewBox, CSS display=24px → mon scale=1.5 → 36px)
+                -- outer circle r=13.5, inner (jante) r=7, stroke sw=3
+                -- ============================================================
+                local tsc   = 36.0 / 30.0   -- 1.2 : SVG unit → pixel
+                local tRout = 13.5 * tsc     -- 16.2 px
+                local tRin  =  7   * tsc     --  8.4 px
+                -- Les pneus ne rebondissent PAS (position absolute bottom:0 dans le CSS)
+                local tireY = roadY - tRout  -- centre Y des pneus (assis sur la route)
+                -- Centre X des deux pneus (déduit du CSS padding du div truckTires)
+                local tireL = tx + 22.5 + tRout   -- padding-left:15px*1.5 + rayon
+                local tireR = tx + 195 - 15 - tRout -- 195 - padding-right:10*1.5 - rayon
+
+                local function drawTire(tcx, tcy)
+                    -- contour stroke sw=3 → halo +1.5
+                    circle(tcx, tcy, tRout + 1.5, Color(40,40,40))
+                    -- pneu noir (fill #282828)
+                    circle(tcx, tcy, tRout,        Color(40,40,40))
+                    -- jante grise (#DFDFDF)
+                    circle(tcx, tcy, tRin,         Color(223,223,223))
+                end
+                drawTire(tireL, tireY)
+                drawTire(tireR, tireY)
+
+                -- ============================================================
+                -- ROUTE — 1.5px height, couleur #282828, pleine largeur
+                -- ============================================================
+                draw.RoundedBox(3, 0, roadY, sizeX, 2, Color(40,40,40))
+
+                -- Tirets animés (road::before / ::after)
+                -- roadAnimation: translateX(0)→translateX(-350px) en 1.4s → 250px/s
+                local roadSpeed = 350.0 / 1.4  -- 250 px/s
+                local dashOff   = (t * roadSpeed) % 50
+                for i = -1, math.ceil(sizeX / 50) + 1 do
+                    local dx = i * 50 - dashOff
+                    if dx > -15 and dx < sizeX + 5 then
+                        draw.RoundedBox(2, dx, roadY - 1, 10, 3, Color(255,255,255))
+                    end
+                end
+
+                -- ============================================================
+                -- LAMPADAIRE SVG (simplifié) — animate roadAnimation 1.4s
+                -- CSS: bottom:0 right:-90%  height:90px
+                -- ============================================================
+                local lampH     = 90             -- hauteur CSS → ~90px dans mon espace
+                local lampSpeed = roadSpeed      -- même vitesse que la route
+                local lampCycle = sizeX + 250    -- distance de cycle pour loop propre
+                local lampX     = sizeX + 120 - ((t * lampSpeed) % lampCycle)
+
+                -- Fût vertical (pied)
+                draw.RoundedBox(2, lampX + 12, roadY - lampH, 5, lampH, Color(40,40,40))
+                -- Bras horizontal
+                draw.RoundedBox(2, lampX,      roadY - lampH, 30, 4,    Color(40,40,40))
+                -- Globe extérieur
+                circle(lampX + 4, roadY - lampH - 9, 9, Color(40,40,40))
+                -- Lueur intérieure (blanc/jaune pâle)
+                circle(lampX + 4, roadY - lampH - 9, 5, Color(255,252,220))
+
+                -- ============================================================
+                -- TEXTE "Paiement en cours..." + BARRE DE PROGRESSION
+                -- ============================================================
+                local dots    = string.rep(".", math.floor(elapsed * 2) % 4)
+                local barW2   = 200
+                local barY2   = roadY + 20
+                draw.DrawText("Paiement en cours" .. dots, "RFS:Font:3D2D:04", halfSizeX, roadY + 6, Color(40,40,40), TEXT_ALIGN_CENTER)
+                draw.RoundedBox(4, halfSizeX - barW2/2, barY2, barW2,                     6, Color(200,200,200))
+                draw.RoundedBox(4, halfSizeX - barW2/2, barY2, barW2 * math.Clamp(elapsed/4,0,1), 6, Color(50,187,120))
 
                 self:DrawMouse(0.1)
 
