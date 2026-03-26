@@ -566,7 +566,7 @@ function ENT:Draw()
                 for _, v in ipairs(self.RFSInfo["orderList"]) do
                     if v.voiture then carCount = carCount + 1 end
                 end
-                local panelH = carCount * 195 + 108  -- 195 par carte + 108 pour la section Se connecter
+                local panelH = carCount * 195 + 10  -- juste les cartes, Se connecter hors fond blanc
                 draw.RoundedBox(0, 18, 100, sizeX-36, panelH, RFS.Colors["white"])
 
             render.SetStencilCompareFunction(STENCIL_EQUAL)
@@ -626,37 +626,30 @@ function ENT:Draw()
                     end -- ignore les entrées non-voiture (ancien format burger)
                 end
 
-                --[[ Bouton Se connecter avec Bolt (style Uiverse / Yaya12085) ]]
-                if self.RFSInfo["stepId"] == 5 then
-                    local carCount = 0
-                    for _, v in ipairs(self.RFSInfo["orderList"]) do
-                        if v.voiture then carCount = carCount + 1 end
-                    end
-                    local loginY = 718 + (carCount * 195) + self.lerpText
-
-                    -- Sous-titre
-                    draw.DrawText("Profitez d'avantages exclusifs en vous", "RFS:Font:3D2D:05", halfSizeX, loginY, RFS.Colors["grey"], TEXT_ALIGN_CENTER)
-                    draw.DrawText("connectant à votre compte Bolt", "RFS:Font:3D2D:05", halfSizeX, loginY + 16, RFS.Colors["grey"], TEXT_ALIGN_CENTER)
-
-                    -- Ombre du bouton (box-shadow CSS)
-                    local bX, bY, bW, bH = halfSizeX - 95, loginY + 36, 190, 40
-                    draw.RoundedBox(8, bX + 2, bY + 4, bW, bH, Color(0, 0, 0, 25))
-
-                    -- Bouton vert (#00DA5A)
-                    draw.RoundedBox(8, bX, bY, bW, bH, Color(0, 218, 90))
-
-                    -- Icône burger à gauche dans le bouton
-                    surface.SetMaterial(RFS.Materials["burger"])
-                    surface.SetDrawColor(Color(255, 255, 255))
-                    surface.DrawTexturedRect(bX + 10, bY + 5, 30, 30)
-
-                    -- Texte "Se connecter avec Bolt"
-                    draw.DrawText("Se connecter avec Bolt", "RFS:Font:3D2D:Bolt", bX + 48, bY + 12, RFS.Colors["white"], TEXT_ALIGN_LEFT)
-                end
-
-                self:DrawMouse(0.1)
-
             render.SetStencilEnable(false)
+
+            --[[ Bouton Se connecter avec Bolt — hors stencil, souris dessinée après ]]
+            if self.RFSInfo["stepId"] == 5 then
+                local carCount = 0
+                for _, v in ipairs(self.RFSInfo["orderList"]) do
+                    if v.voiture then carCount = carCount + 1 end
+                end
+                local loginY = 718 + (carCount * 195) + self.lerpText
+
+                draw.DrawText("Profitez d'avantages exclusifs en vous", "RFS:Font:3D2D:05", halfSizeX, loginY, RFS.Colors["grey"], TEXT_ALIGN_CENTER)
+                draw.DrawText("connectant à votre compte Bolt", "RFS:Font:3D2D:05", halfSizeX, loginY + 16, RFS.Colors["grey"], TEXT_ALIGN_CENTER)
+
+                local bX, bY, bW, bH = halfSizeX - 95, loginY + 36, 190, 40
+                draw.RoundedBox(8, bX + 2, bY + 4, bW, bH, Color(0, 0, 0, 25))
+                draw.RoundedBox(8, bX, bY, bW, bH, Color(0, 218, 90))
+                surface.SetMaterial(RFS.Materials["burger"])
+                surface.SetDrawColor(Color(255, 255, 255))
+                surface.DrawTexturedRect(bX + 10, bY + 5, 30, 30)
+                draw.DrawText("Se connecter avec Bolt", "RFS:Font:3D2D:Bolt", bX + 48, bY + 12, RFS.Colors["white"], TEXT_ALIGN_LEFT)
+            end
+
+            -- Souris dessinée en dernier pour qu'elle passe par-dessus tout
+            self:DrawMouse(0.1)
         end
     RFS.End3D2D()
 
