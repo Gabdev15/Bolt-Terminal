@@ -516,7 +516,7 @@ function ENT:Draw()
 			
                     local replacementTitle = RFS.GetSentence("burger")
 
-                    if v.fries > 0 then
+                    if v.fries and v.fries > 0 then
                         replacementTitle = (replacementTitle..", %s"):format(RFS.GetSentence("amountFries"):format(v.fries))
                     end
 
