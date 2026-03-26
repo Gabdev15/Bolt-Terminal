@@ -176,13 +176,17 @@ function ENT:DrawMouse(ratio)
 end
 
 function ENT:GetTotalOrderPrice()
-    local price = RFS.BasePriceWithoutIngredients or 200
+    local price = 0
 
     for commandeId, commandeTable in ipairs(self.RFSInfo["orderList"]) do
-        for k, v in pairs(commandeTable) do
+        if commandeTable.voiture then
+            local duration = commandeTable.duration or 1
+            price = price + math.floor(duration * 700 * 1.05)
+        else
             local priceEnt = RFS.Terminal.GetTerminalSetting(self, "price") or {}
-
-            price = price + (((priceEnt[k] or RFS.MaxPrice[k]) or 0)*(k == "soda" and 1 or v))*(commandeTable.quantity or 1)
+            for k, v in pairs(commandeTable) do
+                price = price + (((priceEnt[k] or RFS.MaxPrice[k]) or 0)*(k == "soda" and 1 or v))*(commandeTable.quantity or 1)
+            end
         end
     end
 
@@ -510,35 +514,30 @@ function ENT:Draw()
                     draw.RoundedBox(8, 23, 715 + posY, sizeX-37.5, 60, black2)
                     draw.RoundedBox(8, 20, 710 + posY, sizeX-40, 60, white)
 
+                    local carNames = {"Toyota Prius", "Nissan Leaf", "Tesla"}
+                    local voitureId  = v.voiture
+                    local voitureName = voitureId and carNames[voitureId] or nil
+                    local duration   = v.duration or 1
+                    local total      = math.floor(duration * 700 * 1.05)
+
                     surface.SetMaterial(RFS.Materials["burger"])
                     surface.SetDrawColor(white)
-                    surface.DrawTexturedRect(30, 714 + posY, 50, 50)
+                    surface.DrawTexturedRect(28, 715 + posY, 46, 46)
 
-                    local carNames = {"Toyota Prius", "Nissan Leaf", "Tesla"}
-                    local voitureId = v.voiture
-                    local voitureName = voitureId and carNames[voitureId] or nil
-                    local duration = v.duration or 1
-                    local total = math.floor(duration * 700 * 1.05)
-
-                    local replacementTitle = voitureName and (voitureName .. "  ·  " .. duration .. "h") or RFS.GetSentence("burger")
-
-                    if v.fries and v.fries > 0 then
-                        replacementTitle = (replacementTitle..", %s"):format(RFS.GetSentence("amountFries"):format(v.fries))
-                    end
-
-                    if v.soda then
-                        replacementTitle = (replacementTitle..", %s"):format(RFS.SodaList[v.soda]["uniqueName"])
-                    end
-
-                    draw.DrawText(replacementTitle, "RFS:Font:3D2D:04", 90, 722 + posY, black, TEXT_ALIGN_LEFT)
                     if voitureName then
-                        draw.DrawText(RFS.formatMoney(total), "RFS:Font:3D2D:05", 90, 738 + posY, black, TEXT_ALIGN_LEFT)
+                        draw.DrawText(voitureName, "RFS:Font:3D2D:03", 84, 716 + posY, black, TEXT_ALIGN_LEFT)
+                        draw.DrawText(duration .. " heure" .. (duration > 1 and "s" or ""), "RFS:Font:3D2D:05", 84, 738 + posY, black, TEXT_ALIGN_LEFT)
+                        draw.DrawText(RFS.formatMoney(total), "RFS:Font:3D2D:03", sizeX - 28, 723 + posY, black, TEXT_ALIGN_RIGHT)
                     else
+                        local replacementTitle = RFS.GetSentence("burger")
+                        if v.fries and v.fries > 0 then
+                            replacementTitle = (replacementTitle..", %s"):format(RFS.GetSentence("amountFries"):format(v.fries))
+                        end
+                        draw.DrawText(replacementTitle, "RFS:Font:3D2D:04", 90, 722 + posY, black, TEXT_ALIGN_LEFT)
                         local formatString = RFS.ReturnLine(RFS.FormatIngredients(v), 35)
                         draw.DrawText(formatString, "RFS:Font:3D2D:05", 90, 738 + posY, black, TEXT_ALIGN_LEFT)
+                        draw.DrawText("X"..(v.quantity or 1), "RFS:Font:3D2D:02", 293, 730 + posY, black, TEXT_ALIGN_LEFT)
                     end
-                    
-                    draw.DrawText("X"..(v.quantity or 1), "RFS:Font:3D2D:02", 293, 730 + posY, black, TEXT_ALIGN_LEFT)
 
                     local checkMouse = RFS.CheckMouse(self, 5, pos, ang, 315, 725 + posY, 20, 20, 0.1, buttons["burgerQuantityValue"]["func"], {true, k})
                     surface.SetMaterial(RFS.Materials["upArrow"])

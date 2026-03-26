@@ -93,19 +93,30 @@ net.Receive("RFS:MainNet", function(len, ply)
             local orderTableQuantity = string.Explode(";", orders)
                                                                                                                                                                                                                                                                                                                                                                                                                                                        -- 76561199814461257
             
-            local menuPrice = (RFS.BasePriceWithoutIngredients or 200)
+            local menuPrice = 0
+            local isCarOrder = false
+            local carDuration = 1
             for k, v in pairs(orderTableQuantity) do
-                local explode =  string.Explode(":", v)
-                local name, articleQuantity = explode[1], explode[2]
-
-                local price = terminalsPrice[name] or (RFS.MaxPrice[name] or 10)
-
-                articleQuantity = tonumber(articleQuantity)
-                articleQuantity = math.Clamp(articleQuantity, 0, (RFS.MaxQuantity[name] or 1))
-                
-                menuPrice = menuPrice + (price*articleQuantity)
+                local explode = string.Explode(":", v)
+                local name = explode[1]
+                if name == "voiture" then isCarOrder = true end
+                if name == "duration" then carDuration = math.max(1, tonumber(explode[2]) or 1) end
             end
-            menuPrice = menuPrice*quantity
+
+            if isCarOrder then
+                menuPrice = math.floor(carDuration * 700 * 1.05)
+            else
+                menuPrice = (RFS.BasePriceWithoutIngredients or 200)
+                for k, v in pairs(orderTableQuantity) do
+                    local explode = string.Explode(":", v)
+                    local name, articleQuantity = explode[1], explode[2]
+                    local price = terminalsPrice[name] or (RFS.MaxPrice[name] or 10)
+                    articleQuantity = tonumber(articleQuantity)
+                    articleQuantity = math.Clamp(articleQuantity, 0, (RFS.MaxQuantity[name] or 1))
+                    menuPrice = menuPrice + (price * articleQuantity)
+                end
+                menuPrice = menuPrice * quantity
+            end
             
             if ply:RFSGetMoney() > menuPrice then
                 ply:RFSAddMoney(-menuPrice)
