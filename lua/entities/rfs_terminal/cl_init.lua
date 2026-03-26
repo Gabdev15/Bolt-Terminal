@@ -38,26 +38,18 @@ local buttons = {
                     RFS.Notification(5, "Veuillez accepter les conditions d'utilisation.")
                     return
                 end
-                if ent.loaderActive then return end
-                ent.loaderActive = true
-                ent.loaderStartTime = CurTime()
-
-                timer.Simple(4, function()
-                    if not IsValid(ent) then return end
-                    ent.loaderActive = false
-                    net.Start("RFS:MainNet")
-                        net.WriteUInt(4, 5)
-                        net.WriteUInt(#ent.RFSInfo["orderList"], 6)
-                        for k, v in pairs(ent.RFSInfo["orderList"]) do
-                            local order = ""
-                            for key, value in pairs(v) do
-                                order = order .. (order == "" and "" or ";") .. key .. ":" .. value
-                            end
-                            net.WriteString(order)
-                            net.WriteUInt((v.quantity or 1), 5)
+                net.Start("RFS:MainNet")
+                    net.WriteUInt(4, 5)
+                    net.WriteUInt(#ent.RFSInfo["orderList"], 6)
+                    for k,v in pairs(ent.RFSInfo["orderList"]) do
+                        local order = ""
+                        for key, value in pairs(v) do
+                            order = order..(order == "" and "" or ";")..key..":"..value
                         end
-                    net.SendToServer()
-                end)
+                        net.WriteString(order)
+                        net.WriteUInt((v.quantity or 1), 5)
+                    end
+                net.SendToServer()
                 return
             elseif ent.RFSInfo["stepId"] == 6 then
                 ent.RFSInfo["stepId"] = 1
@@ -470,36 +462,8 @@ function ENT:Draw()
                 end
             end
                 
-            --[[ Loader de paiement ]]
-            if self.loaderActive then
-                -- Overlay blanc semi-transparent
-                draw.RoundedBox(0, 0, 100, sizeX, 360, Color(255, 255, 255, 230))
-
-                -- Spinner : 8 points qui tournent
-                local t    = CurTime()
-                local spCX = halfSizeX
-                local spCY = 260
-                local spR  = 32
-                for i = 1, 8 do
-                    local angle = (i / 8) * math.pi * 2 + t * 2.5
-                    local dx = math.cos(angle) * spR
-                    local dy = math.sin(angle) * spR
-                    local alpha = math.floor(((i - 1) / 8) * 210 + 45)
-                    draw.RoundedBox(50, spCX + dx - 6, spCY + dy - 6, 12, 12, Color(50, 187, 120, alpha))
-                end
-
-                -- Barre de progression (4 secondes)
-                local elapsed  = math.min(CurTime() - (self.loaderStartTime or CurTime()), 4)
-                local progress = elapsed / 4
-                draw.RoundedBox(4, halfSizeX - 85, spCY + 48, 170, 8, Color(220, 220, 220))
-                draw.RoundedBox(4, halfSizeX - 85, spCY + 48, 170 * progress, 8, Color(50, 187, 120))
-
-                -- Texte
-                draw.DrawText("Paiement en cours...", "RFS:Font:3D2D:03", halfSizeX, spCY + 65, Color(60, 60, 60), TEXT_ALIGN_CENTER)
-            end
-
             --[[ Down button to change step ]]
-            local checkMouse = self.loaderActive and false or RFS.CheckMouse(self, 0, pos, ang, halfSizeX-100, 450, 200, 50, 0.1, buttons["nextStep"]["func"])
+            local checkMouse = RFS.CheckMouse(self, 0, pos, ang, halfSizeX-100, 450, 200, 50, 0.1, buttons["nextStep"]["func"])
 
             self.lerpButton = self.lerpButton or 0
             self.lerpButton = Lerp(frameTime*5, self.lerpButton, (checkMouse and 255 or 200))
@@ -618,16 +582,21 @@ function ENT:Draw()
                         local tw = surface.GetTextSize("Accepter les ")
                         draw.DrawText("Accepter les ", "RFS:Font:3D2D:05", cbX + cbSize + 6, cbY + 3, black, TEXT_ALIGN_LEFT)
                         draw.DrawText("conditions d'utilisation", "RFS:Font:3D2D:05", cbX + cbSize + 6 + tw, cbY + 3, Color(50, 187, 120), TEXT_ALIGN_LEFT)
-                    end -- ignore les entrées non-voiture (ancien format burger)
+                    else
+                        local replacementTitle = RFS.GetSentence("burger")
+                        if v.fries and v.fries > 0 then
+                            replacementTitle = (replacementTitle..", %s"):format(RFS.GetSentence("amountFries"):format(v.fries))
+                        end
+                        draw.DrawText(replacementTitle, "RFS:Font:3D2D:04", 90, 722 + posY, black, TEXT_ALIGN_LEFT)
+                        local formatString = RFS.ReturnLine(RFS.FormatIngredients(v), 35)
+                        draw.DrawText(formatString, "RFS:Font:3D2D:05", 90, 738 + posY, black, TEXT_ALIGN_LEFT)
+                        draw.DrawText("X"..(v.quantity or 1), "RFS:Font:3D2D:02", 293, 730 + posY, black, TEXT_ALIGN_LEFT)
+                    end
                 end
 
                 --[[ Bouton Se connecter avec Bolt (style Uiverse / Yaya12085) ]]
                 if self.RFSInfo["stepId"] == 5 then
-                    local carCount = 0
-                    for _, v in ipairs(self.RFSInfo["orderList"]) do
-                        if v.voiture then carCount = carCount + 1 end
-                    end
-                    local loginY = 718 + (carCount * 195) + self.lerpText
+                    local loginY = 918 + self.lerpText
 
                     -- Sous-titre
                     draw.DrawText("Profitez d'avantages exclusifs en vous", "RFS:Font:3D2D:05", halfSizeX, loginY, RFS.Colors["grey"], TEXT_ALIGN_CENTER)
