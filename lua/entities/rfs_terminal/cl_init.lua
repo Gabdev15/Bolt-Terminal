@@ -350,61 +350,13 @@ function ENT:Draw()
                     local tax         = math.floor(subtotal * 0.05)
                     local total       = subtotal + tax
 
-                    -- ═══ Silhouette Toyota Prius ═══
-                    local cx = halfSizeX - 100
-                    local cy = 230 + self.lerpText
-
-                    -- Corps principal (bleu métallique)
-                    surface.SetDrawColor(65, 120, 180)
-                    surface.DrawPoly({
-                        {x=cx+5,   y=cy+55}, {x=cx+5,   y=cy+28},
-                        {x=cx+20,  y=cy+6},  {x=cx+120, y=cy+3},
-                        {x=cx+160, y=cy+14}, {x=cx+185, y=cy+40},
-                        {x=cx+197, y=cy+55},
-                    })
-                    -- Bandeau bas (teinte foncée)
-                    surface.SetDrawColor(45, 90, 140)
-                    surface.DrawPoly({
-                        {x=cx+5,   y=cy+46}, {x=cx+197, y=cy+46},
-                        {x=cx+197, y=cy+55}, {x=cx+5,   y=cy+55},
-                    })
-                    -- Passages de roues (blanc)
-                    draw.RoundedBox(50, cx+14,  cy+37, 36, 36, Color(242,242,242))
-                    draw.RoundedBox(50, cx+148, cy+37, 36, 36, Color(242,242,242))
-                    -- Pneus
-                    draw.RoundedBox(50, cx+16,  cy+39, 32, 32, Color(30,30,35))
-                    draw.RoundedBox(50, cx+150, cy+39, 32, 32, Color(30,30,35))
-                    -- Jantes
-                    draw.RoundedBox(50, cx+22,  cy+45, 20, 20, Color(185,190,205))
-                    draw.RoundedBox(50, cx+156, cy+45, 20, 20, Color(185,190,205))
-                    -- Moyeux
-                    draw.RoundedBox(50, cx+28,  cy+51, 8,  8,  Color(50,55,70))
-                    draw.RoundedBox(50, cx+162, cy+51, 8,  8,  Color(50,55,70))
-                    -- Vitre arrière
-                    surface.SetDrawColor(155, 200, 230, 210)
-                    surface.DrawPoly({
-                        {x=cx+7,  y=cy+30}, {x=cx+21, y=cy+8},
-                        {x=cx+48, y=cy+5},  {x=cx+48, y=cy+32},
-                        {x=cx+16, y=cy+32},
-                    })
-                    -- Pare-brise
-                    surface.SetDrawColor(155, 200, 230, 210)
-                    surface.DrawPoly({
-                        {x=cx+54,  y=cy+5},  {x=cx+158, y=cy+15},
-                        {x=cx+175, y=cy+40}, {x=cx+54,  y=cy+40},
-                    })
-                    -- Montant B
-                    surface.SetDrawColor(65, 120, 180)
-                    surface.DrawPoly({
-                        {x=cx+49, y=cy+5},  {x=cx+54, y=cy+5},
-                        {x=cx+54, y=cy+40}, {x=cx+49, y=cy+40},
-                    })
-                    -- Phare avant
-                    draw.RoundedBox(3, cx+182, cy+35, 14, 7, Color(255, 240, 130))
-                    -- Feu arrière
-                    draw.RoundedBox(2, cx+3,   cy+36, 5,  12, Color(220, 55, 55))
-                    -- Badge
-                    draw.DrawText("TOYOTA PRIUS", "RFS:Font:3D2D:05", cx+100, cy+74, Color(80,85,95), TEXT_ALIGN_CENTER)
+                    -- ═══ Image Toyota Prius ═══
+                    local imgW, imgH = 200, 90
+                    local imgX = halfSizeX - imgW / 2
+                    local imgY = 228 + self.lerpText
+                    surface.SetMaterial(RFS.Materials["prius"])
+                    surface.SetDrawColor(255, 255, 255, 255)
+                    surface.DrawTexturedRect(imgX, imgY, imgW, imgH)
 
                     -- Voiture sélectionnée
                     draw.DrawText("Voiture : " .. voitureName, "RFS:Font:3D2D:02", halfSizeX, 320 + self.lerpText, black, TEXT_ALIGN_CENTER)
