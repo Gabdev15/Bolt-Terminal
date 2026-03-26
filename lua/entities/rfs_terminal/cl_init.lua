@@ -499,49 +499,33 @@ function ENT:Draw()
             end
                 
             --[[ Down button to change step ]]
-            if self.RFSInfo["stepId"] == 3 then
-                -- Checkout button (style Uiverse.io)
-                local btnW, btnH = 250, 52
-                local btnX = halfSizeX - btnW / 2
-                local btnY = 447
-                local checkMouse = RFS.CheckMouse(self, 0, pos, ang, btnX, btnY, btnW, btnH, 0.1, buttons["nextStep"]["func"])
+            local checkMouse = RFS.CheckMouse(self, 0, pos, ang, halfSizeX-100, 450, 200, 50, 0.1, buttons["nextStep"]["func"])
 
-                self.lerpCheckoutLeft = self.lerpCheckoutLeft or 0
-                self.lerpCheckoutLeft = Lerp(frameTime * 8, self.lerpCheckoutLeft, checkMouse and btnW or 115)
+            self.lerpButton = self.lerpButton or 0
+            self.lerpButton = Lerp(frameTime*5, self.lerpButton, (checkMouse and 255 or 200))
 
-                -- Fond blanc
-                draw.RoundedBox(6, btnX, btnY, btnW, btnH, Color(255, 255, 255))
-                -- Partie gauche verte (s'étend au hover)
-                draw.RoundedBox(6, btnX, btnY, self.lerpCheckoutLeft, btnH, Color(93, 226, 163))
-                -- Mini carte bancaire
-                draw.RoundedBox(5, btnX + 20, btnY + 8, 52, 34, Color(199, 255, 188))
-                draw.RoundedBox(2, btnX + 22, btnY + 14, 48, 9, Color(128, 234, 105))
-                -- Texte Checkout
-                local textAlpha = math.Clamp(math.Round(255 - (self.lerpCheckoutLeft - 115) * 3.7), 30, 255)
-                draw.DrawText("Checkout", "RFS:Font:3D2D:03", btnX + 186, btnY + 14, Color(30, 30, 30, textAlpha), TEXT_ALIGN_CENTER)
-            else
-                local checkMouse = RFS.CheckMouse(self, 0, pos, ang, halfSizeX-100, 450, 200, 50, 0.1, buttons["nextStep"]["func"])
+            -- Animation de disparition/apparition du bouton lors du changement d'étape
+            self.lerpBtnScale = self.lerpBtnScale or 1
+            self.lerpBtnAlpha = self.lerpBtnAlpha or 255
 
-                self.lerpButton = self.lerpButton or 0
-                self.lerpButton = Lerp(frameTime*5, self.lerpButton, (checkMouse and 255 or 200))
+            local btnColor = ColorAlpha(RFS.Colors["orange"], self.lerpButton)
 
-                local orangeColor = ColorAlpha(RFS.Colors["orange"], self.lerpButton)
+            draw.RoundedBox(8, halfSizeX-100, 450, 200, 50, btnColor)
 
-                draw.RoundedBox(8, halfSizeX-100, 450, 200, 50, orangeColor)
-
-                local buttonText = "startOrder"
-                if self.RFSInfo["stepId"] == 1 then
-                    buttonText  = "startOrder"
-                elseif self.RFSInfo["stepId"] > 1 && self.RFSInfo["stepId"] < 5 then
-                    buttonText = "next"
-                elseif self.RFSInfo["stepId"] == 5 then
-                    buttonText = "payOrder"
-                elseif self.RFSInfo["stepId"] == 6 then
-                    buttonText = "close"
-                end
-
-                draw.DrawText(RFS.GetSentence(buttonText):format(RFS.formatMoney(self:GetTotalOrderPrice())), "RFS:Font:3D2D:03", halfSizeX, 462, RFS.Colors["white"], TEXT_ALIGN_CENTER)
+            local buttonText = "startOrder"
+            if self.RFSInfo["stepId"] == 1 then
+                buttonText = "startOrder"
+            elseif self.RFSInfo["stepId"] == 3 then
+                buttonText = "checkout"
+            elseif self.RFSInfo["stepId"] > 1 && self.RFSInfo["stepId"] < 5 then
+                buttonText = "next"
+            elseif self.RFSInfo["stepId"] == 5 then
+                buttonText = "payOrder"
+            elseif self.RFSInfo["stepId"] == 6 then
+                buttonText = "close"
             end
+
+            draw.DrawText(RFS.GetSentence(buttonText):format(RFS.formatMoney(self:GetTotalOrderPrice())), "RFS:Font:3D2D:03", halfSizeX, 462, RFS.Colors["white"], TEXT_ALIGN_CENTER)
 
             --[[ Bottom line ]]
             draw.RoundedBox(8, halfSizeX-150, 430, 300, 1, RFS.Colors["grey"])
