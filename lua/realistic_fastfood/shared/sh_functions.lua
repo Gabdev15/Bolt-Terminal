@@ -53,7 +53,7 @@ function PLAYER:RFSGetMoney()
         return tonumber(self:getChar() != nil and self:getChar():getMoney() or "0")
     end
 
-    return 0
+    return self.RFSSandboxMoney or 0
 end
 
 --[[ Check if an entity class is near the player ]]

@@ -689,6 +689,8 @@ function PLAYER:RFSAddMoney(price)
             local money = self:RFSGetMoney()
             self:getChar():setMoney(money + price)
         end
+    else
+        self.RFSSandboxMoney = (self.RFSSandboxMoney or 0) + price
     end
 end
 
