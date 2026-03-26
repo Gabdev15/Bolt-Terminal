@@ -526,7 +526,7 @@ function ENT:Draw()
 
                     surface.SetMaterial(RFS.Materials["burger"])
                     surface.SetDrawColor(white)
-                    surface.DrawTexturedRect(26, 716 + posY, 56, 56)
+                    surface.DrawTexturedRect(26, 740 + posY, 56, 56)
 
                     if voitureName then
                         -- Titre + prix total
@@ -558,13 +558,28 @@ function ENT:Draw()
                     end
                 end
 
-                --[[ Bouton Se connecter (non fonctionnel) ]]
+                --[[ Bouton Se connecter avec Bolt (style Uiverse / Yaya12085) ]]
                 if self.RFSInfo["stepId"] == 5 then
                     local loginY = 892 + self.lerpText
+
+                    -- Sous-titre
                     draw.DrawText("Profitez d'avantages exclusifs en vous", "RFS:Font:3D2D:05", halfSizeX, loginY, RFS.Colors["grey"], TEXT_ALIGN_CENTER)
                     draw.DrawText("connectant à votre compte Bolt", "RFS:Font:3D2D:05", halfSizeX, loginY + 16, RFS.Colors["grey"], TEXT_ALIGN_CENTER)
-                    draw.RoundedBox(8, halfSizeX - 85, loginY + 36, 170, 42, Color(50, 187, 120))
-                    draw.DrawText("Se connecter", "RFS:Font:3D2D:03", halfSizeX, loginY + 47, RFS.Colors["white"], TEXT_ALIGN_CENTER)
+
+                    -- Ombre du bouton (box-shadow CSS)
+                    local bX, bY, bW, bH = halfSizeX - 95, loginY + 36, 190, 40
+                    draw.RoundedBox(8, bX + 2, bY + 4, bW, bH, Color(0, 0, 0, 25))
+
+                    -- Bouton vert (#00DA5A)
+                    draw.RoundedBox(8, bX, bY, bW, bH, Color(0, 218, 90))
+
+                    -- Icône burger à gauche dans le bouton
+                    surface.SetMaterial(RFS.Materials["burger"])
+                    surface.SetDrawColor(Color(255, 255, 255))
+                    surface.DrawTexturedRect(bX + 10, bY + 5, 30, 30)
+
+                    -- Texte "Se connecter avec Bolt"
+                    draw.DrawText("Se connecter avec Bolt", "RFS:Font:3D2D:05", bX + 48, bY + 13, RFS.Colors["white"], TEXT_ALIGN_LEFT)
                 end
 
                 self:DrawMouse(0.1)
