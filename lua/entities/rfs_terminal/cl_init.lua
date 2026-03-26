@@ -558,6 +558,15 @@ function ENT:Draw()
                     end
                 end
 
+                --[[ Bouton Se connecter (non fonctionnel) ]]
+                if self.RFSInfo["stepId"] == 5 then
+                    local loginY = 892 + self.lerpText
+                    draw.DrawText("Profitez d'avantages exclusifs en vous", "RFS:Font:3D2D:05", halfSizeX, loginY, RFS.Colors["grey"], TEXT_ALIGN_CENTER)
+                    draw.DrawText("connectant à votre compte Bolt", "RFS:Font:3D2D:05", halfSizeX, loginY + 16, RFS.Colors["grey"], TEXT_ALIGN_CENTER)
+                    draw.RoundedBox(8, halfSizeX - 85, loginY + 36, 170, 42, Color(50, 187, 120))
+                    draw.DrawText("Se connecter", "RFS:Font:3D2D:03", halfSizeX, loginY + 47, RFS.Colors["white"], TEXT_ALIGN_CENTER)
+                end
+
                 self:DrawMouse(0.1)
 
             render.SetStencilEnable(false)
