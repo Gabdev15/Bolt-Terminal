@@ -504,30 +504,48 @@ function ENT:Draw()
             render.SetStencilCompareFunction(STENCIL_NEVER)
             render.SetStencilFailOperation(STENCIL_REPLACE)
             
-                draw.RoundedBox(0, 18, 100, sizeX-36, 220, RFS.Colors["white"])
-            
+                draw.RoundedBox(0, 18, 100, sizeX-36, 380, RFS.Colors["white"])
+
             render.SetStencilCompareFunction(STENCIL_EQUAL)
             render.SetStencilFailOperation(STENCIL_KEEP)
                 for k, v in ipairs(self.RFSInfo["orderList"]) do
-                    local posY = (self.lerpText + ((k-1)*70)) + self.lerpScroll*70
+                    local posY = (self.lerpText + ((k-1)*170)) + self.lerpScroll*170
+                    local cardH = 160
 
-                    draw.RoundedBox(8, 23, 715 + posY, sizeX-37.5, 60, black2)
-                    draw.RoundedBox(8, 20, 710 + posY, sizeX-40, 60, white)
+                    draw.RoundedBox(8, 23, 715 + posY, sizeX-37.5, cardH, black2)
+                    draw.RoundedBox(8, 20, 710 + posY, sizeX-40, cardH, white)
 
                     local carNames = {"Toyota Prius", "Nissan Leaf", "Tesla"}
-                    local voitureId  = v.voiture
+                    local voitureId   = v.voiture
                     local voitureName = voitureId and carNames[voitureId] or nil
-                    local duration   = v.duration or 1
-                    local total      = math.floor(duration * 700 * 1.05)
+                    local duration    = v.duration or 1
+                    local priceHeure  = 700
+                    local subtotal    = duration * priceHeure
+                    local tax         = math.floor(subtotal * 0.05)
+                    local total       = subtotal + tax
 
                     surface.SetMaterial(RFS.Materials["burger"])
                     surface.SetDrawColor(white)
-                    surface.DrawTexturedRect(28, 715 + posY, 46, 46)
+                    surface.DrawTexturedRect(26, 716 + posY, 56, 56)
 
                     if voitureName then
-                        draw.DrawText(voitureName, "RFS:Font:3D2D:03", 84, 716 + posY, black, TEXT_ALIGN_LEFT)
-                        draw.DrawText(duration .. " heure" .. (duration > 1 and "s" or ""), "RFS:Font:3D2D:05", 84, 738 + posY, black, TEXT_ALIGN_LEFT)
-                        draw.DrawText(RFS.formatMoney(total), "RFS:Font:3D2D:03", sizeX - 28, 723 + posY, black, TEXT_ALIGN_RIGHT)
+                        -- Titre + prix total
+                        draw.DrawText(voitureName, "RFS:Font:3D2D:03", 92, 713 + posY, black, TEXT_ALIGN_LEFT)
+                        draw.DrawText(RFS.formatMoney(total), "RFS:Font:3D2D:03", sizeX - 24, 713 + posY, black, TEXT_ALIGN_RIGHT)
+                        -- Séparateur
+                        draw.RoundedBox(1, 92, 738 + posY, sizeX - 116, 1, black2)
+                        -- Détail
+                        draw.DrawText("Prix / heure :", "RFS:Font:3D2D:05", 92, 745 + posY, black, TEXT_ALIGN_LEFT)
+                        draw.DrawText(RFS.formatMoney(priceHeure), "RFS:Font:3D2D:05", sizeX - 24, 745 + posY, black, TEXT_ALIGN_RIGHT)
+                        draw.DrawText("Durée :", "RFS:Font:3D2D:05", 92, 762 + posY, black, TEXT_ALIGN_LEFT)
+                        draw.DrawText(duration .. " heure" .. (duration > 1 and "s" or ""), "RFS:Font:3D2D:05", sizeX - 24, 762 + posY, black, TEXT_ALIGN_RIGHT)
+                        draw.DrawText("Sous-total :", "RFS:Font:3D2D:05", 92, 779 + posY, black, TEXT_ALIGN_LEFT)
+                        draw.DrawText(RFS.formatMoney(subtotal), "RFS:Font:3D2D:05", sizeX - 24, 779 + posY, black, TEXT_ALIGN_RIGHT)
+                        draw.DrawText("Taxe (5%) :", "RFS:Font:3D2D:05", 92, 796 + posY, black, TEXT_ALIGN_LEFT)
+                        draw.DrawText(RFS.formatMoney(tax), "RFS:Font:3D2D:05", sizeX - 24, 796 + posY, black, TEXT_ALIGN_RIGHT)
+                        -- Séparateur final
+                        draw.RoundedBox(1, 92, 814 + posY, sizeX - 116, 1, black2)
+                        draw.DrawText("TOTAL : " .. RFS.formatMoney(total), "RFS:Font:3D2D:02", halfSizeX, 820 + posY, black, TEXT_ALIGN_CENTER)
                     else
                         local replacementTitle = RFS.GetSentence("burger")
                         if v.fries and v.fries > 0 then
@@ -538,16 +556,6 @@ function ENT:Draw()
                         draw.DrawText(formatString, "RFS:Font:3D2D:05", 90, 738 + posY, black, TEXT_ALIGN_LEFT)
                         draw.DrawText("X"..(v.quantity or 1), "RFS:Font:3D2D:02", 293, 730 + posY, black, TEXT_ALIGN_LEFT)
                     end
-
-                    local checkMouse = RFS.CheckMouse(self, 5, pos, ang, 315, 725 + posY, 20, 20, 0.1, buttons["burgerQuantityValue"]["func"], {true, k})
-                    surface.SetMaterial(RFS.Materials["upArrow"])
-                    surface.SetDrawColor(white)
-                    surface.DrawTexturedRect(315, 725 + posY, 20, 20)
-                    
-                    local checkMouse = RFS.CheckMouse(self, 5, pos, ang, 315, 737 + posY, 20, 20, 0.1, buttons["burgerQuantityValue"]["func"], {false, k})
-                    surface.SetMaterial(RFS.Materials["downArrow"])
-                    surface.SetDrawColor(white)
-                    surface.DrawTexturedRect(315, 737 + posY, 20, 20)
                 end
 
                 self:DrawMouse(0.1)
