@@ -11,6 +11,7 @@ RFS.Language["en"] = {
 	["continueOrder"] = "Continue my order",
 	["portions"] = "%s portion(s)",
 	["next"] = "Next step",
+	["checkout"] = "Checkout",
 	["startOrder"] = "Start order",
 	["total"] = "Total : %s",
 	["burger"] = "Burger",
