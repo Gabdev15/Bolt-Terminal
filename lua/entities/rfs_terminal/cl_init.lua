@@ -350,32 +350,88 @@ function ENT:Draw()
                     local tax         = math.floor(subtotal * 0.05)
                     local total       = subtotal + tax
 
+                    -- ═══ Silhouette Toyota Prius ═══
+                    local cx = halfSizeX - 100
+                    local cy = 230 + self.lerpText
+
+                    -- Corps principal (bleu métallique)
+                    surface.SetDrawColor(65, 120, 180)
+                    surface.DrawPoly({
+                        {x=cx+5,   y=cy+55}, {x=cx+5,   y=cy+28},
+                        {x=cx+20,  y=cy+6},  {x=cx+120, y=cy+3},
+                        {x=cx+160, y=cy+14}, {x=cx+185, y=cy+40},
+                        {x=cx+197, y=cy+55},
+                    })
+                    -- Bandeau bas (teinte foncée)
+                    surface.SetDrawColor(45, 90, 140)
+                    surface.DrawPoly({
+                        {x=cx+5,   y=cy+46}, {x=cx+197, y=cy+46},
+                        {x=cx+197, y=cy+55}, {x=cx+5,   y=cy+55},
+                    })
+                    -- Passages de roues (blanc)
+                    draw.RoundedBox(50, cx+14,  cy+37, 36, 36, Color(242,242,242))
+                    draw.RoundedBox(50, cx+148, cy+37, 36, 36, Color(242,242,242))
+                    -- Pneus
+                    draw.RoundedBox(50, cx+16,  cy+39, 32, 32, Color(30,30,35))
+                    draw.RoundedBox(50, cx+150, cy+39, 32, 32, Color(30,30,35))
+                    -- Jantes
+                    draw.RoundedBox(50, cx+22,  cy+45, 20, 20, Color(185,190,205))
+                    draw.RoundedBox(50, cx+156, cy+45, 20, 20, Color(185,190,205))
+                    -- Moyeux
+                    draw.RoundedBox(50, cx+28,  cy+51, 8,  8,  Color(50,55,70))
+                    draw.RoundedBox(50, cx+162, cy+51, 8,  8,  Color(50,55,70))
+                    -- Vitre arrière
+                    surface.SetDrawColor(155, 200, 230, 210)
+                    surface.DrawPoly({
+                        {x=cx+7,  y=cy+30}, {x=cx+21, y=cy+8},
+                        {x=cx+48, y=cy+5},  {x=cx+48, y=cy+32},
+                        {x=cx+16, y=cy+32},
+                    })
+                    -- Pare-brise
+                    surface.SetDrawColor(155, 200, 230, 210)
+                    surface.DrawPoly({
+                        {x=cx+54,  y=cy+5},  {x=cx+158, y=cy+15},
+                        {x=cx+175, y=cy+40}, {x=cx+54,  y=cy+40},
+                    })
+                    -- Montant B
+                    surface.SetDrawColor(65, 120, 180)
+                    surface.DrawPoly({
+                        {x=cx+49, y=cy+5},  {x=cx+54, y=cy+5},
+                        {x=cx+54, y=cy+40}, {x=cx+49, y=cy+40},
+                    })
+                    -- Phare avant
+                    draw.RoundedBox(3, cx+182, cy+35, 14, 7, Color(255, 240, 130))
+                    -- Feu arrière
+                    draw.RoundedBox(2, cx+3,   cy+36, 5,  12, Color(220, 55, 55))
+                    -- Badge
+                    draw.DrawText("TOYOTA PRIUS", "RFS:Font:3D2D:05", cx+100, cy+74, Color(80,85,95), TEXT_ALIGN_CENTER)
+
                     -- Voiture sélectionnée
-                    draw.DrawText("Voiture : " .. voitureName, "RFS:Font:3D2D:02", halfSizeX, 230 + self.lerpText, black, TEXT_ALIGN_CENTER)
+                    draw.DrawText("Voiture : " .. voitureName, "RFS:Font:3D2D:02", halfSizeX, 320 + self.lerpText, black, TEXT_ALIGN_CENTER)
 
                     -- Sélecteur de durée
-                    local checkMinus = RFS.CheckMouse(self, 3, pos, ang, halfSizeX - 115, 278 + self.lerpText, 30, 30, 0.1, buttons["changeDuration"]["func"], {false})
-                    draw.DrawText("-", "RFS:Font:3D2D:01", halfSizeX - 100, 273 + self.lerpText, checkMinus and orange or grey, TEXT_ALIGN_CENTER)
+                    local checkMinus = RFS.CheckMouse(self, 3, pos, ang, halfSizeX - 115, 368 + self.lerpText, 30, 30, 0.1, buttons["changeDuration"]["func"], {false})
+                    draw.DrawText("-", "RFS:Font:3D2D:01", halfSizeX - 100, 363 + self.lerpText, checkMinus and orange or grey, TEXT_ALIGN_CENTER)
 
-                    draw.DrawText(duration .. " heure" .. (duration > 1 and "s" or ""), "RFS:Font:3D2D:02", halfSizeX, 283 + self.lerpText, black, TEXT_ALIGN_CENTER)
+                    draw.DrawText(duration .. " heure" .. (duration > 1 and "s" or ""), "RFS:Font:3D2D:02", halfSizeX, 373 + self.lerpText, black, TEXT_ALIGN_CENTER)
 
-                    local checkPlus = RFS.CheckMouse(self, 3, pos, ang, halfSizeX + 85, 278 + self.lerpText, 30, 30, 0.1, buttons["changeDuration"]["func"], {true})
-                    draw.DrawText("+", "RFS:Font:3D2D:01", halfSizeX + 100, 273 + self.lerpText, checkPlus and orange or grey, TEXT_ALIGN_CENTER)
+                    local checkPlus = RFS.CheckMouse(self, 3, pos, ang, halfSizeX + 85, 368 + self.lerpText, 30, 30, 0.1, buttons["changeDuration"]["func"], {true})
+                    draw.DrawText("+", "RFS:Font:3D2D:01", halfSizeX + 100, 363 + self.lerpText, checkPlus and orange or grey, TEXT_ALIGN_CENTER)
 
                     -- Séparateur
-                    draw.RoundedBox(1, halfSizeX - 120, 325 + self.lerpText, 240, 1, grey)
+                    draw.RoundedBox(1, halfSizeX - 120, 415 + self.lerpText, 240, 1, grey)
 
                     -- Détail des prix
-                    draw.DrawText("Prix / heure : " .. RFS.formatMoney(priceHeure),        "RFS:Font:3D2D:02", halfSizeX, 345 + self.lerpText, black, TEXT_ALIGN_CENTER)
-                    draw.DrawText("Durée : " .. duration .. " heure" .. (duration > 1 and "s" or ""), "RFS:Font:3D2D:02", halfSizeX, 385 + self.lerpText, black, TEXT_ALIGN_CENTER)
-                    draw.DrawText("Sous-total : " .. RFS.formatMoney(subtotal),             "RFS:Font:3D2D:02", halfSizeX, 425 + self.lerpText, black, TEXT_ALIGN_CENTER)
-                    draw.DrawText("Taxe (5%) : " .. RFS.formatMoney(tax),                   "RFS:Font:3D2D:02", halfSizeX, 465 + self.lerpText, grey,  TEXT_ALIGN_CENTER)
+                    draw.DrawText("Prix / heure : " .. RFS.formatMoney(priceHeure),        "RFS:Font:3D2D:02", halfSizeX, 435 + self.lerpText, black, TEXT_ALIGN_CENTER)
+                    draw.DrawText("Durée : " .. duration .. " heure" .. (duration > 1 and "s" or ""), "RFS:Font:3D2D:02", halfSizeX, 475 + self.lerpText, black, TEXT_ALIGN_CENTER)
+                    draw.DrawText("Sous-total : " .. RFS.formatMoney(subtotal),             "RFS:Font:3D2D:02", halfSizeX, 515 + self.lerpText, black, TEXT_ALIGN_CENTER)
+                    draw.DrawText("Taxe (5%) : " .. RFS.formatMoney(tax),                   "RFS:Font:3D2D:02", halfSizeX, 555 + self.lerpText, grey,  TEXT_ALIGN_CENTER)
 
                     -- Séparateur
-                    draw.RoundedBox(1, halfSizeX - 120, 500 + self.lerpText, 240, 1, grey)
+                    draw.RoundedBox(1, halfSizeX - 120, 590 + self.lerpText, 240, 1, grey)
 
                     -- Total
-                    draw.DrawText("TOTAL : " .. RFS.formatMoney(total), "RFS:Font:3D2D:01", halfSizeX, 515 + self.lerpText, RFS.Colors["black"], TEXT_ALIGN_CENTER)
+                    draw.DrawText("TOTAL : " .. RFS.formatMoney(total), "RFS:Font:3D2D:01", halfSizeX, 605 + self.lerpText, RFS.Colors["black"], TEXT_ALIGN_CENTER)
                 end
                 
 
