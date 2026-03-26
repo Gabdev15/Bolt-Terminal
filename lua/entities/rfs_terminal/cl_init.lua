@@ -20,12 +20,14 @@ local buttons = {
                     net.WriteUInt(3, 5)
                 net.SendToServer()
                 return
-            elseif ent.RFSInfo["stepId"] == 4 then
+            elseif ent.RFSInfo["stepId"] == 3 then
                 ent.RFSInfo["currentCommand"] = ent.RFSInfo["currentCommand"] or {}
                 ent.RFSInfo["orderList"] = ent.RFSInfo["orderList"] or {}
 
                 ent.RFSInfo["orderList"][#ent.RFSInfo["orderList"] + 1] = ent.RFSInfo["currentCommand"]
                 ent.RFSInfo["currentCommand"] = {}
+                ent.RFSInfo["stepId"] = 5
+                return
             elseif ent.RFSInfo["stepId"] == 5 then
                 net.Start("RFS:MainNet")
                     net.WriteUInt(4, 5)
@@ -358,70 +360,6 @@ function ENT:Draw()
                     draw.DrawText("TOTAL : " .. RFS.formatMoney(total), "RFS:Font:3D2D:01", halfSizeX, 515 + self.lerpText, RFS.Colors["black"], TEXT_ALIGN_CENTER)
                 end
                 
-                --[[ Choose soda (step 4) ]]
-                self.lerpSoda = self.lerpSoda or 0
-                self.lerpSoda = Lerp(frameTime*5, self.lerpSoda, (self.RFSInfo["stepId"] == 4 and 255 or 0))
-
-                self.lerpPrice = self.lerpPrice or 0
-                self.lerpPrice = Lerp(frameTime*5, self.lerpPrice, (self.RFSInfo["stepId"] == 4 and 180 or 0))
-
-                if self.RFSInfo["stepId"] > 3 && self.RFSInfo["stepId"] < 5 then
-                    local black = ColorAlpha(RFS.Colors["black"], self.lerpSoda)
-                    local white = ColorAlpha(RFS.Colors["white"], self.lerpSoda)
-                    local grey = ColorAlpha(RFS.Colors["grey"], self.lerpPrice)
-                    
-                    draw.DrawText(RFS.GetSentence("sodaTitle"), "RFS:Font:3D2D:01", halfSizeX, 430 + self.lerpText, black, TEXT_ALIGN_CENTER)
-                    draw.DrawText(RFS.GetSentence("sodaDescription"), "RFS:Font:3D2D:02", halfSizeX, 470 + self.lerpText, black, TEXT_ALIGN_CENTER)
-                    
-                    --[[ Calcul to draw all soda list configurable (step 4) ]]
-                    local cardsByLine, cardAmount, cardWidth, cardHeight, cardSpaceX, cardSpaceY = 4, #RFS.SodaList, 70, 70, 5, 5
-                    self.RFSInfo["currentCommand"]["soda"] = self.RFSInfo["currentCommand"]["soda"] or nil
-                    
-                    for i=1, math.ceil(cardAmount / cardsByLine) do
-                        if i > 8 then continue end
-                        
-                        local startJ, endJ = (i - 1) * cardsByLine + 1, math.Clamp(i * cardsByLine, 0, cardAmount)
-                        local cardAmountOnLine = endJ - startJ + 1
-                                                                                                                                                                                                                                                                                                                                                                                                                                                       -- 9df8a41e67be64bef2e3a0ecea717cb3cf78369cf6ecfcb6b671f6aa5106af46
-                        
-                        local startX = (sizeX - (cardAmountOnLine * cardWidth + (cardAmountOnLine - 1) * cardSpaceX)) / 2
-                        
-                        for j = startJ, endJ do
-                            local x = startX + (j - startJ) * (cardWidth + cardSpaceX)
-                            local y = 670 + (i - 1) * (cardHeight + cardSpaceY)
-                            
-                            local checkMouse = RFS.CheckMouse(self, 4, pos, ang, x, y + self.lerpText, cardWidth, cardHeight, 0.1, buttons["chooseSoda"]["func"], {j})
-
-                            self.lerpSodaBackt = self.lerpSodaBackt or {}
-                            self.lerpSodaBackt[j] = self.lerpSodaBackt[j] or 0
-                            self.lerpSodaBackt[j] = Lerp(frameTime*5, self.lerpSodaBackt[j], (self.RFSInfo["stepId"] == 4 and (checkMouse and 255 or 100) or 0))
-
-                            local backSoda = ColorAlpha(RFS.SodaList[j]["color"], self.lerpSodaBackt[j])
-                            draw.RoundedBox(4, x, y + self.lerpText, cardWidth, cardHeight, backSoda)
-                            
-                            surface.SetMaterial(RFS.SodaList[j]["mat"])
-                            surface.SetDrawColor(white)
-                            surface.DrawTexturedRect(x + cardWidth*0.1, y + self.lerpText + cardHeight*0.1, cardWidth*0.8, cardHeight*0.8)
-                        end
-                    end
-                    
-                    local sodaId = self.RFSInfo["currentCommand"]["soda"]
-
-                    if sodaId then
-                        self.lerpSlide = self.lerpSlide or 0
-                        self.lerpSlide = Lerp(frameTime*10, self.lerpSlide, 38 + ((cardWidth+cardSpaceX)*(self.RFSInfo["currentCommand"]["soda"]-1)))
-    
-                        local backSoda = ColorAlpha(RFS.SodaList[sodaId]["color"], self.lerpSodaBackt[sodaId])
-    
-                        draw.RoundedBox(4, self.lerpSlide, 670 + self.lerpText + cardHeight + 5, cardWidth, 10, backSoda)
-                    end
-
-                    surface.SetMaterial(RFS.Materials["soda"])
-                    surface.SetDrawColor(white)
-                    surface.DrawTexturedRect(halfSizeX - 64, 525 + self.lerpText, 128, 128)
-
-                    draw.DrawText(RFS.GetSentence("total"):format(RFS.formatMoney(self:GetCurrentOrderPrice())), "RFS:Font:3D2D:02", halfSizeX, 800 + self.lerpText, grey, TEXT_ALIGN_CENTER)
-                end
 
                 --[[ does the payement is approved or no ]]
                 self.lerpFinalPayement = self.lerpFinalPayement or 0
