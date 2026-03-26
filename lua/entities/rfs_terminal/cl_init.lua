@@ -136,6 +136,13 @@ local buttons = {
             ent.RFSInfo["currentCommand"]["voiture"] = args[1]
         end,
     },
+    ["changeDuration"] = {
+        ["func"] = function(ent, args)
+            ent.RFSInfo["currentCommand"] = ent.RFSInfo["currentCommand"] or {}
+            ent.RFSInfo["currentCommand"]["duration"] = ent.RFSInfo["currentCommand"]["duration"] or 1
+            ent.RFSInfo["currentCommand"]["duration"] = math.Clamp(ent.RFSInfo["currentCommand"]["duration"] + (args[1] and 1 or -1), 1, 99)
+        end,
+    },
 }
 
 --[[ Init all variable of the terminal ]]
@@ -300,37 +307,55 @@ function ENT:Draw()
                     end
                 end
 
-                --[[ Choose fries and quantity (step 3) ]] 
+                --[[ Résumé du panier (step 3) ]]
                 self.lerpExtra = self.lerpExtra or 0
                 self.lerpExtra = Lerp(frameTime*5, self.lerpExtra, (self.RFSInfo["stepId"] == 3 and 180 or 0))
-                
+
                 self.lerpBlack = self.lerpBlack or 0
                 self.lerpBlack = Lerp(frameTime*5, self.lerpBlack, (self.RFSInfo["stepId"] == 3 and 255 or 0))
 
                 if self.RFSInfo["stepId"] > 2 && self.RFSInfo["stepId"] < 4 then
-                    local black = ColorAlpha(RFS.Colors["black"], self.lerpBlack)
-                    local white = ColorAlpha(RFS.Colors["white"], self.lerpBlack)
-                    local grey = ColorAlpha(RFS.Colors["grey"], self.lerpExtra)
+                    local black  = ColorAlpha(RFS.Colors["black"], self.lerpBlack)
+                    local grey   = ColorAlpha(RFS.Colors["grey"],  self.lerpExtra)
                     local orange = ColorAlpha(RFS.Colors["orange"], self.lerpExtra)
 
-                    draw.DrawText(RFS.GetSentence("friesTitle"), "RFS:Font:3D2D:01", halfSizeX, 230 + self.lerpText, black, TEXT_ALIGN_CENTER)
-                    draw.DrawText(RFS.GetSentence("friesDescription"), "RFS:Font:3D2D:02", halfSizeX, 270 + self.lerpText, black, TEXT_ALIGN_CENTER)
-                    
-                    surface.SetMaterial(RFS.Materials["fries"])
-                    surface.SetDrawColor(white)
-                    surface.DrawTexturedRect(halfSizeX - 64, 350 + self.lerpText, 128, 128)
-                    
-                    local checkMouse = RFS.CheckMouse(self, 3, pos, ang, halfSizeX - 115, 505 + self.lerpText, 30, 30, 0.1, buttons["friesQuantity"]["func"], {false})
-                    draw.DrawText("-", "RFS:Font:3D2D:01", halfSizeX - 100, 500 + self.lerpText, checkMouse and orange or grey, TEXT_ALIGN_CENTER)
-                    
-                    local checkMouse = RFS.CheckMouse(self, 3, pos, ang, halfSizeX + 85, 505 + self.lerpText, 30, 30, 0.1, buttons["friesQuantity"]["func"], {true})
-                    draw.DrawText("+", "RFS:Font:3D2D:01", halfSizeX + 100, 500 + self.lerpText, checkMouse and orange or grey, TEXT_ALIGN_CENTER)
+                    local carNames = {"Toyota Prius", "Nissan Leaf", "Tesla"}
+                    local voitureId   = self.RFSInfo["currentCommand"]["voiture"]
+                    local voitureName = voitureId and carNames[voitureId] or "Aucune"
 
-                    self.RFSInfo["currentCommand"] = self.RFSInfo["currentCommand"] or {}
-                    self.RFSInfo["currentCommand"]["fries"] = self.RFSInfo["currentCommand"]["fries"] or 1
-                    
-                    draw.DrawText((RFS.GetSentence("portions")):format(self.RFSInfo["currentCommand"]["fries"]), "RFS:Font:3D2D:02", halfSizeX, 510 + self.lerpText, grey, TEXT_ALIGN_CENTER)
-                    draw.DrawText((RFS.GetSentence("total")):format(RFS.formatMoney(self:GetCurrentOrderPrice())), "RFS:Font:3D2D:02", halfSizeX, 600 + self.lerpText, grey, TEXT_ALIGN_CENTER)
+                    self.RFSInfo["currentCommand"]["duration"] = self.RFSInfo["currentCommand"]["duration"] or 1
+                    local duration    = self.RFSInfo["currentCommand"]["duration"]
+                    local priceHeure  = 700
+                    local subtotal    = duration * priceHeure
+                    local tax         = math.floor(subtotal * 0.05)
+                    local total       = subtotal + tax
+
+                    -- Voiture sélectionnée
+                    draw.DrawText("Voiture : " .. voitureName, "RFS:Font:3D2D:02", halfSizeX, 230 + self.lerpText, black, TEXT_ALIGN_CENTER)
+
+                    -- Sélecteur de durée
+                    local checkMinus = RFS.CheckMouse(self, 3, pos, ang, halfSizeX - 115, 278 + self.lerpText, 30, 30, 0.1, buttons["changeDuration"]["func"], {false})
+                    draw.DrawText("-", "RFS:Font:3D2D:01", halfSizeX - 100, 273 + self.lerpText, checkMinus and orange or grey, TEXT_ALIGN_CENTER)
+
+                    draw.DrawText(duration .. " heure" .. (duration > 1 and "s" or ""), "RFS:Font:3D2D:02", halfSizeX, 283 + self.lerpText, black, TEXT_ALIGN_CENTER)
+
+                    local checkPlus = RFS.CheckMouse(self, 3, pos, ang, halfSizeX + 85, 278 + self.lerpText, 30, 30, 0.1, buttons["changeDuration"]["func"], {true})
+                    draw.DrawText("+", "RFS:Font:3D2D:01", halfSizeX + 100, 273 + self.lerpText, checkPlus and orange or grey, TEXT_ALIGN_CENTER)
+
+                    -- Séparateur
+                    draw.RoundedBox(1, halfSizeX - 120, 325 + self.lerpText, 240, 1, grey)
+
+                    -- Détail des prix
+                    draw.DrawText("Prix / heure : " .. RFS.formatMoney(priceHeure),        "RFS:Font:3D2D:02", halfSizeX, 345 + self.lerpText, black, TEXT_ALIGN_CENTER)
+                    draw.DrawText("Durée : " .. duration .. " heure" .. (duration > 1 and "s" or ""), "RFS:Font:3D2D:02", halfSizeX, 385 + self.lerpText, black, TEXT_ALIGN_CENTER)
+                    draw.DrawText("Sous-total : " .. RFS.formatMoney(subtotal),             "RFS:Font:3D2D:02", halfSizeX, 425 + self.lerpText, black, TEXT_ALIGN_CENTER)
+                    draw.DrawText("Taxe (5%) : " .. RFS.formatMoney(tax),                   "RFS:Font:3D2D:02", halfSizeX, 465 + self.lerpText, grey,  TEXT_ALIGN_CENTER)
+
+                    -- Séparateur
+                    draw.RoundedBox(1, halfSizeX - 120, 500 + self.lerpText, 240, 1, grey)
+
+                    -- Total
+                    draw.DrawText("TOTAL : " .. RFS.formatMoney(total), "RFS:Font:3D2D:01", halfSizeX, 515 + self.lerpText, RFS.Colors["black"], TEXT_ALIGN_CENTER)
                 end
                 
                 --[[ Choose soda (step 4) ]]
@@ -474,27 +499,49 @@ function ENT:Draw()
             end
                 
             --[[ Down button to change step ]]
-            local checkMouse = RFS.CheckMouse(self, 0, pos, ang, halfSizeX-100, 450, 200, 50, 0.1, buttons["nextStep"]["func"])
+            if self.RFSInfo["stepId"] == 3 then
+                -- Checkout button (style Uiverse.io)
+                local btnW, btnH = 250, 52
+                local btnX = halfSizeX - btnW / 2
+                local btnY = 447
+                local checkMouse = RFS.CheckMouse(self, 0, pos, ang, btnX, btnY, btnW, btnH, 0.1, buttons["nextStep"]["func"])
 
-            self.lerpButton = self.lerpButton or 0
-            self.lerpButton = Lerp(frameTime*5, self.lerpButton, (checkMouse and 255 or 200))
-    
-            local orangeColor = ColorAlpha(RFS.Colors["orange"], self.lerpButton)
-    
-            draw.RoundedBox(8, halfSizeX-100, 450, 200, 50, orangeColor)
+                self.lerpCheckoutLeft = self.lerpCheckoutLeft or 0
+                self.lerpCheckoutLeft = Lerp(frameTime * 8, self.lerpCheckoutLeft, checkMouse and btnW or 115)
 
-            local buttonText = "startOrder"
-            if self.RFSInfo["stepId"] == 1 then
-                buttonText  = "startOrder"
-            elseif self.RFSInfo["stepId"] > 1 && self.RFSInfo["stepId"] < 5 then
-                buttonText = "next"
-            elseif self.RFSInfo["stepId"] == 5 then
-                buttonText = "payOrder"
-            elseif self.RFSInfo["stepId"] == 6 then
-                buttonText = "close"
+                -- Fond blanc
+                draw.RoundedBox(6, btnX, btnY, btnW, btnH, Color(255, 255, 255))
+                -- Partie gauche verte (s'étend au hover)
+                draw.RoundedBox(6, btnX, btnY, self.lerpCheckoutLeft, btnH, Color(93, 226, 163))
+                -- Mini carte bancaire
+                draw.RoundedBox(5, btnX + 20, btnY + 8, 52, 34, Color(199, 255, 188))
+                draw.RoundedBox(2, btnX + 22, btnY + 14, 48, 9, Color(128, 234, 105))
+                -- Texte Checkout
+                local textAlpha = math.Clamp(math.Round(255 - (self.lerpCheckoutLeft - 115) * 3.7), 30, 255)
+                draw.DrawText("Checkout", "RFS:Font:3D2D:03", btnX + 186, btnY + 14, Color(30, 30, 30, textAlpha), TEXT_ALIGN_CENTER)
+            else
+                local checkMouse = RFS.CheckMouse(self, 0, pos, ang, halfSizeX-100, 450, 200, 50, 0.1, buttons["nextStep"]["func"])
+
+                self.lerpButton = self.lerpButton or 0
+                self.lerpButton = Lerp(frameTime*5, self.lerpButton, (checkMouse and 255 or 200))
+
+                local orangeColor = ColorAlpha(RFS.Colors["orange"], self.lerpButton)
+
+                draw.RoundedBox(8, halfSizeX-100, 450, 200, 50, orangeColor)
+
+                local buttonText = "startOrder"
+                if self.RFSInfo["stepId"] == 1 then
+                    buttonText  = "startOrder"
+                elseif self.RFSInfo["stepId"] > 1 && self.RFSInfo["stepId"] < 5 then
+                    buttonText = "next"
+                elseif self.RFSInfo["stepId"] == 5 then
+                    buttonText = "payOrder"
+                elseif self.RFSInfo["stepId"] == 6 then
+                    buttonText = "close"
+                end
+
+                draw.DrawText(RFS.GetSentence(buttonText):format(RFS.formatMoney(self:GetTotalOrderPrice())), "RFS:Font:3D2D:03", halfSizeX, 462, RFS.Colors["white"], TEXT_ALIGN_CENTER)
             end
-            
-            draw.DrawText(RFS.GetSentence(buttonText):format(RFS.formatMoney(self:GetTotalOrderPrice())), "RFS:Font:3D2D:03", halfSizeX, 462, RFS.Colors["white"], TEXT_ALIGN_CENTER)
 
             --[[ Bottom line ]]
             draw.RoundedBox(8, halfSizeX-150, 430, 300, 1, RFS.Colors["grey"])
