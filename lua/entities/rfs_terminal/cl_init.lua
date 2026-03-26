@@ -321,6 +321,11 @@ function ENT:Draw()
                     local grey   = ColorAlpha(RFS.Colors["grey"],  self.lerpExtra)
                     local orange = ColorAlpha(RFS.Colors["orange"], self.lerpExtra)
 
+                    -- Logo burger en haut de l'étape résumé
+                    surface.SetMaterial(RFS.Materials["burger"])
+                    surface.SetDrawColor(black)
+                    surface.DrawTexturedRect(halfSizeX - 30, 212 + self.lerpText, 60, 60)
+
                     local carNames = {"Toyota Prius", "Nissan Leaf", "Tesla"}
                     local voitureId   = self.RFSInfo["currentCommand"]["voiture"]
                     local voitureName = voitureId and carNames[voitureId] or "Aucune"
@@ -463,7 +468,17 @@ function ENT:Draw()
                 buttonText = "close"
             end
 
-            draw.DrawText(RFS.GetSentence(buttonText):format(RFS.formatMoney(self:GetTotalOrderPrice())), "RFS:Font:3D2D:03", halfSizeX, 462, RFS.Colors["white"], TEXT_ALIGN_CENTER)
+            if self.RFSInfo["stepId"] == 3 then
+                local carNames = {"Toyota Prius", "Nissan Leaf", "Tesla"}
+                local voitureId  = self.RFSInfo["currentCommand"] and self.RFSInfo["currentCommand"]["voiture"]
+                local voitureName = voitureId and carNames[voitureId] or "?"
+                local duration   = (self.RFSInfo["currentCommand"] and self.RFSInfo["currentCommand"]["duration"]) or 1
+                local total      = math.floor(duration * 700 * 1.05)
+                draw.DrawText("Valider", "RFS:Font:3D2D:03", halfSizeX, 454, RFS.Colors["white"], TEXT_ALIGN_CENTER)
+                draw.DrawText(voitureName .. "  ·  " .. duration .. "h  ·  " .. RFS.formatMoney(total), "RFS:Font:3D2D:05", halfSizeX, 473, RFS.Colors["white"], TEXT_ALIGN_CENTER)
+            else
+                draw.DrawText(RFS.GetSentence(buttonText):format(RFS.formatMoney(self:GetTotalOrderPrice())), "RFS:Font:3D2D:03", halfSizeX, 462, RFS.Colors["white"], TEXT_ALIGN_CENTER)
+            end
 
             --[[ Bottom line ]]
             draw.RoundedBox(8, halfSizeX-150, 430, 300, 1, RFS.Colors["grey"])
