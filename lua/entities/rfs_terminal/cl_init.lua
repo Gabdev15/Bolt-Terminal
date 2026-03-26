@@ -509,8 +509,8 @@ function ENT:Draw()
             render.SetStencilCompareFunction(STENCIL_EQUAL)
             render.SetStencilFailOperation(STENCIL_KEEP)
                 for k, v in ipairs(self.RFSInfo["orderList"]) do
-                    local posY = (self.lerpText + ((k-1)*170)) + self.lerpScroll*170
-                    local cardH = 160
+                    local posY = (self.lerpText + ((k-1)*195)) + self.lerpScroll*195
+                    local cardH = 185
 
                     draw.RoundedBox(8, 23, 715 + posY, sizeX-37.5, cardH, black2)
                     draw.RoundedBox(8, 20, 710 + posY, sizeX-40, cardH, white)
@@ -542,6 +542,17 @@ function ENT:Draw()
                         -- Séparateur final
                         draw.RoundedBox(1, 24, 814 + posY, sizeX - 48, 1, black2)
                         draw.DrawText("TOTAL : " .. RFS.formatMoney(total), "RFS:Font:3D2D:02", halfSizeX, 820 + posY, black, TEXT_ALIGN_CENTER)
+
+                        -- Checkbox "Accepter les conditions d'utilisation"
+                        local cbX, cbY, cbSize = 24, 845 + posY, 16
+                        -- Contour de la checkbox (style SVG rounded square)
+                        draw.RoundedBox(3, cbX, cbY, cbSize, cbSize, black2)
+                        draw.RoundedBox(2, cbX + 2, cbY + 2, cbSize - 4, cbSize - 4, white)
+                        -- Texte
+                        surface.SetFont("RFS:Font:3D2D:05")
+                        local tw = surface.GetTextSize("Accepter les ")
+                        draw.DrawText("Accepter les ", "RFS:Font:3D2D:05", cbX + cbSize + 6, cbY + 3, black, TEXT_ALIGN_LEFT)
+                        draw.DrawText("conditions d'utilisation", "RFS:Font:3D2D:05", cbX + cbSize + 6 + tw, cbY + 3, Color(50, 187, 120), TEXT_ALIGN_LEFT)
                     else
                         local replacementTitle = RFS.GetSentence("burger")
                         if v.fries and v.fries > 0 then
