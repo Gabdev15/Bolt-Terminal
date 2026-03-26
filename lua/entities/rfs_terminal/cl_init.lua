@@ -562,7 +562,12 @@ function ENT:Draw()
             render.SetStencilCompareFunction(STENCIL_NEVER)
             render.SetStencilFailOperation(STENCIL_REPLACE)
             
-                draw.RoundedBox(0, 18, 100, sizeX-36, 380, RFS.Colors["white"])
+                local carCount = 0
+                for _, v in ipairs(self.RFSInfo["orderList"]) do
+                    if v.voiture then carCount = carCount + 1 end
+                end
+                local panelH = carCount * 195 + 108  -- 195 par carte + 108 pour la section Se connecter
+                draw.RoundedBox(0, 18, 100, sizeX-36, panelH, RFS.Colors["white"])
 
             render.SetStencilCompareFunction(STENCIL_EQUAL)
             render.SetStencilFailOperation(STENCIL_KEEP)
