@@ -138,6 +138,11 @@ local buttons = {
             ent.RFSInfo["currentCommand"]["voiture"] = args[1]
         end,
     },
+    ["toggleCGU"] = {
+        ["func"] = function(ent)
+            ent.RFSInfo["cguAccepted"] = not ent.RFSInfo["cguAccepted"]
+        end,
+    },
     ["changeDuration"] = {
         ["func"] = function(ent, args)
             ent.RFSInfo["currentCommand"] = ent.RFSInfo["currentCommand"] or {}
@@ -544,10 +549,17 @@ function ENT:Draw()
                         draw.DrawText("TOTAL : " .. RFS.formatMoney(total), "RFS:Font:3D2D:02", halfSizeX, 820 + posY, black, TEXT_ALIGN_CENTER)
 
                         -- Checkbox "Accepter les conditions d'utilisation"
-                        local cbX, cbY, cbSize = 24, 845 + posY, 16
-                        -- Contour de la checkbox (style SVG rounded square)
+                        local cbX, cbY, cbSize = 24, 848 + posY, 16
+                        local cguChecked = self.RFSInfo["cguAccepted"] or false
+                        RFS.CheckMouse(self, 5, pos, ang, cbX, cbY, cbSize, cbSize, 0.1, buttons["toggleCGU"]["func"])
+                        -- Contour
                         draw.RoundedBox(3, cbX, cbY, cbSize, cbSize, black2)
-                        draw.RoundedBox(2, cbX + 2, cbY + 2, cbSize - 4, cbSize - 4, white)
+                        -- Fond : vert si coché, blanc sinon
+                        draw.RoundedBox(2, cbX + 2, cbY + 2, cbSize - 4, cbSize - 4, cguChecked and Color(50, 187, 120) or white)
+                        -- Coche
+                        if cguChecked then
+                            draw.DrawText("✓", "RFS:Font:3D2D:05", cbX + cbSize / 2, cbY + 2, RFS.Colors["white"], TEXT_ALIGN_CENTER)
+                        end
                         -- Texte
                         surface.SetFont("RFS:Font:3D2D:05")
                         local tw = surface.GetTextSize("Accepter les ")
@@ -567,7 +579,7 @@ function ENT:Draw()
 
                 --[[ Bouton Se connecter avec Bolt (style Uiverse / Yaya12085) ]]
                 if self.RFSInfo["stepId"] == 5 then
-                    local loginY = 892 + self.lerpText
+                    local loginY = 918 + self.lerpText
 
                     -- Sous-titre
                     draw.DrawText("Profitez d'avantages exclusifs en vous", "RFS:Font:3D2D:05", halfSizeX, loginY, RFS.Colors["grey"], TEXT_ALIGN_CENTER)
