@@ -29,6 +29,10 @@ local buttons = {
                 ent.RFSInfo["stepId"] = 5
                 return
             elseif ent.RFSInfo["stepId"] == 5 then
+                if not ent.RFSInfo["cguAccepted"] then
+                    RFS.Notification(5, "Veuillez accepter les conditions d'utilisation.")
+                    return
+                end
                 net.Start("RFS:MainNet")
                     net.WriteUInt(4, 5)
                     net.WriteUInt(#ent.RFSInfo["orderList"], 6)
