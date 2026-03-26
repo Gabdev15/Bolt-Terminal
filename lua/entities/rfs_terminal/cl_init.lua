@@ -20,6 +20,11 @@ local buttons = {
                     net.WriteUInt(3, 5)
                 net.SendToServer()
                 return
+            elseif ent.RFSInfo["stepId"] == 2 then
+                if not (ent.RFSInfo["currentCommand"] and ent.RFSInfo["currentCommand"]["voiture"]) then
+                    RFS.Notification(5, "Veuillez sélectionner une voiture.")
+                    return
+                end
             elseif ent.RFSInfo["stepId"] == 3 then
                 ent.RFSInfo["currentCommand"] = ent.RFSInfo["currentCommand"] or {}
                 ent.RFSInfo["orderList"] = ent.RFSInfo["orderList"] or {}
