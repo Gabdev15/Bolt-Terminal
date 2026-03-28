@@ -144,4 +144,5 @@ RFS.Language["en"] = {
 	["orangejuice"] = "OrangeJuice",
 	["cherry"] = "Cherry",
 	["noIngredients"] = "No ingredients for the burger",
+	["prius"] = "Toyota Prius",
 }

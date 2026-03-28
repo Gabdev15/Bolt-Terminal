@@ -330,7 +330,7 @@ function RFS.GetTerminalSetting(terminal, key)
     terminal.RFS = terminal.RFS or {}
     terminal.RFS["settings"] = terminal.RFS["settings"] or {}
 
-    return terminal.RFS[key]
+    return terminal.RFS["settings"][key]
 end
 
 --[[ Save all settings of the terminal ]]

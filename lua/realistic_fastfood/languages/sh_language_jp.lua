@@ -133,4 +133,5 @@ RFS.Language["jp"] = {
 	["alreadyHaveSwep"] = "あなたはすでにこの食べ物を手にしている",
 	["bag"] = "バッグ",
 	["noIngredients"] = "バーガーの材料がありません",
+	["prius"] = "Toyota Prius",
 }

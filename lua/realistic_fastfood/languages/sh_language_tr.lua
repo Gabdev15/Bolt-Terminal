@@ -131,4 +131,5 @@ RFS.Language["tr"] = {
 	["alreadyHaveSwep"] = "Elinizde zaten bu yiyecek var",
 	["bag"] = "Çanta",
 	["noIngredients"] = "Burger için malzeme yok",
+	["prius"] = "Toyota Prius",
 }

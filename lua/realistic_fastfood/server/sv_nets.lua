@@ -104,7 +104,8 @@ net.Receive("RFS:MainNet", function(len, ply)
             end
 
             if isCarOrder then
-                menuPrice = math.floor(carDuration * 700 * 1.05)
+                local priusPrice = terminalsPrice["prius"] or RFS.MaxPrice["prius"] or 700
+                menuPrice = math.floor(carDuration * priusPrice * 1.05)
             else
                 menuPrice = (RFS.BasePriceWithoutIngredients or 200)
                 for k, v in pairs(orderTableQuantity) do
@@ -118,7 +119,7 @@ net.Receive("RFS:MainNet", function(len, ply)
                 menuPrice = menuPrice * quantity
             end
             
-            if ply:RFSGetMoney() > menuPrice then
+            if ply:RFSGetMoney() >= menuPrice then
                 ply:RFSAddMoney(-menuPrice)
 
                 --[[ Create all menu on the terminal ]]

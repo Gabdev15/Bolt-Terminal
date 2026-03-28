@@ -135,4 +135,5 @@ RFS.Language["ru"] = {
 	["alreadyHaveSwep"] = "У вас уже есть эта еда на руках",
 	["bag"] = "Сумка",
 	["noIngredients"] = "Нет ингредиентов для бургера",
+	["prius"] = "Toyota Prius",
 }

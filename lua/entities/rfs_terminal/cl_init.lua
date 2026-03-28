@@ -199,22 +199,6 @@ local buttons = {
             ent.RFSInfo["stepId"] = math.Clamp(ent.RFSInfo["stepId"] + 1, 0, 5)
         end,
     },
-    ["burgerQuantity"] = {
-        ["func"] = function(ent, args)
-            ent.RFSInfo["currentCommand"] = ent.RFSInfo["currentCommand"] or {}
-            
-            local uniqueName = args[2]
-            
-            local settings = RFS.Terminal.GetTerminalSetting(ent, "quantity") or {}
-
-            local defaultMax = (RFS.MaxQuantity[uniqueName] or 1)
-            local settingMax = (settings[uniqueName] or defaultMax)
-            
-            settingMax = math.Clamp(settingMax, 0, defaultMax)
-            
-            ent.RFSInfo["currentCommand"][uniqueName] = math.Clamp(ent.RFSInfo["currentCommand"][uniqueName] + (args[1] and 1 or -1), 0, settingMax)
-        end,
-    },
     ["burgerQuantityValue"] = {
         ["func"] = function(ent, args)
             ent.RFSInfo["orderList"] = ent.RFSInfo["orderList"] or {}
@@ -231,33 +215,19 @@ local buttons = {
             end
         end,
     },
-    ["friesQuantity"] = {
+    ["priusQuantity"] = {
         ["func"] = function(ent, args)
             ent.RFSInfo["currentCommand"] = ent.RFSInfo["currentCommand"] or {}
 
-            local max = RFS.MaxQuantity["fries"] or 1
-
             local settings = RFS.Terminal.GetTerminalSetting(ent, "quantity") or {}
 
-            local defaultMax = (RFS.MaxQuantity["fries"] or 1)
-            local settingMax = (settings["fries"] or defaultMax)
+            local defaultMax = (RFS.MaxQuantity["prius"] or 5)
+            local settingMax = (settings["prius"] or defaultMax)
                                                                                                                                                                                                                                                                                                                                                                                                                                                        -- 1283ca0e9ceddd2d5e4f3ce0ed12f2ad0d5f173ee5648228bba71b519f799017
             
             settingMax = math.Clamp(settingMax, 0, defaultMax)
 
-            ent.RFSInfo["currentCommand"]["fries"] = math.Clamp(ent.RFSInfo["currentCommand"]["fries"] + (args[1] and 1 or -1), 0, settingMax)
-        end,
-    },
-    ["chooseSoda"] = {
-        ["func"] = function(ent, args)
-            ent.RFSInfo["currentCommand"] = ent.RFSInfo["currentCommand"] or {}
-
-	if ent.RFSInfo["currentCommand"]["soda"] == args[1] then
-                ent.RFSInfo["currentCommand"]["soda"] = nil
-                return
-            end
-
-            ent.RFSInfo["currentCommand"]["soda"] = args[1]
+            ent.RFSInfo["currentCommand"]["prius"] = math.Clamp((ent.RFSInfo["currentCommand"]["prius"] or 1) + (args[1] and 1 or -1), 1, settingMax)
         end,
     },
     ["newOrder"] = {
@@ -372,7 +342,9 @@ function ENT:GetTotalOrderPrice()
     for commandeId, commandeTable in ipairs(self.RFSInfo["orderList"]) do
         if commandeTable.voiture then
             local duration = commandeTable.duration or 1
-            price = price + math.floor(duration * 700 * 1.05)
+            local priceEnt = RFS.Terminal.GetTerminalSetting(self, "price") or {}
+            local priceHeure = priceEnt["prius"] or RFS.MaxPrice["prius"] or 700
+            price = price + math.floor(duration * priceHeure * 1.05)
         else
             local priceEnt = RFS.Terminal.GetTerminalSetting(self, "price") or {}
             for k, v in pairs(commandeTable) do
@@ -522,7 +494,8 @@ function ENT:Draw()
 
                     self.RFSInfo["currentCommand"]["duration"] = self.RFSInfo["currentCommand"]["duration"] or 1
                     local duration    = self.RFSInfo["currentCommand"]["duration"]
-                    local priceHeure  = 700
+                    local priceSettings = RFS.Terminal.GetTerminalSetting(self, "price") or {}
+                    local priceHeure  = priceSettings["prius"] or RFS.MaxPrice["prius"] or 700
                     local subtotal    = duration * priceHeure
                     local tax         = math.floor(subtotal * 0.05)
                     local total       = subtotal + tax
@@ -791,7 +764,8 @@ function ENT:Draw()
                     local voitureId   = v.voiture
                     local voitureName = voitureId and carNames[voitureId] or nil
                     local duration    = v.duration or 1
-                    local priceHeure  = 700
+                    local priceSettings = RFS.Terminal.GetTerminalSetting(self, "price") or {}
+                    local priceHeure  = priceSettings["prius"] or RFS.MaxPrice["prius"] or 700
                     local subtotal    = duration * priceHeure
                     local tax         = math.floor(subtotal * 0.05)
                     local total       = subtotal + tax

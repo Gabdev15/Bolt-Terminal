@@ -140,4 +140,5 @@ RFS.Language["fr"] = {
 	["disableService"] = "Désactiver le service",
 	["enableService"] = "Activer le service",
 	["noIngredients"] = "Aucuns ingrédients pour le burger",
+	["prius"] = "Toyota Prius",
 }

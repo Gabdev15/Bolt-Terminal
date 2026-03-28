@@ -167,46 +167,22 @@ RFS.Missions = {
 }
                                                                                                                                                                                                                                                                                                                                                                                                                                                        -- 1283ca0e9ceddd2d5e4f3ce0ed12f2ad0d5f173ee5648228bba71b519f799017
 
---[[ Price for the cooker for each ingredients ]] 
+--[[ Price for the cooker for each vehicle ]]
 RFS.PriceForCooker = {
-    ["fries"] = 100,
-    ["tomato"] = 100,
-    ["salad"] = 100,
-    ["onion"] = 100,
-    ["cheese"] = 100,
-    ["fries"] = 100,
-    ["steak"] = 100,
-    ["soda"] = 50,
-    ["bun"] = 50,
-    ["bun2"] = 50,
-    ["friesCup"] = 50,
+    ["prius"] = 700,
 }
 
--- [[ Base price for the burger without ingredients ]]
-RFS.BasePriceWithoutIngredients = 200
+-- [[ Base price without options ]]
+RFS.BasePriceWithoutIngredients = 0
 
---[[ Max price per ingredients for the terminal ]]
+--[[ Max price per vehicle for the terminal ]]
 RFS.MaxPrice = {
-    ["fries"] = 100,
-    ["tomato"] = 100,
-    ["salad"] = 100,
-    ["onion"] = 100,
-    ["cheese"] = 100,
-    ["fries"] = 100,
-    ["steak"] = 100,
-    ["soda"] = 50,
+    ["prius"] = 700,
 }
 
---[[ Max quantity per ingredients for the terminal ]]
+--[[ Max quantity per vehicle for the terminal ]]
 RFS.MaxQuantity = {
-    ["fries"] = 3,
-    ["tomato"] = 3,
-    ["salad"] = 3,
-    ["onion"] = 3,
-    ["cheese"] = 3,
-    ["fries"] = 3,
-    ["steak"] = 3,
-    ["soda"] = 1,
+    ["prius"] = 5,
 }
 
 --[[ Set the amount food that give product for your burger ]]
