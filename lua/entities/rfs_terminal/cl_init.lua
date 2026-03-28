@@ -679,12 +679,34 @@ function ENT:Draw()
                 -- Font 3D2D:03 = taille 25 → centré dans h=46 : (46-25)/2 = 10
                 draw.DrawText("Se connecter", "RFS:Font:3D2D:03", halfSizeX, btnY + 10 + lo, RFS.Colors["white"], TEXT_ALIGN_CENTER)
 
-                -- Note Firebase
-                draw.DrawText("Connexion Firebase bientot disponible", "RFS:Font:3D2D:05", halfSizeX, btnY + btnH + 14 + lo, grey3, TEXT_ALIGN_CENTER)
+                -- Card QR Code
+                local cardY  = btnY + btnH + 10 + lo
+                local cardH  = 64
+                local qrSize = 50
+                local qrX    = padX + fieldW - qrSize - 8
+                local qrY    = cardY + (cardH - qrSize) / 2
+
+                -- Fond de la carte
+                draw.RoundedBox(8, padX + 2, cardY + 3, fieldW, cardH, Color(0, 0, 0, 15))
+                draw.RoundedBox(8, padX,     cardY,     fieldW, cardH, Color(240, 240, 240, 220))
+                -- Texte à gauche
+                draw.DrawText("Rejoignez Bolt",         "RFS:Font:3D2D:04", padX + 14, cardY + 8,  black, TEXT_ALIGN_LEFT)
+                draw.DrawText("Inscrivez-vous",          "RFS:Font:3D2D:05", padX + 14, cardY + 26, grey3, TEXT_ALIGN_LEFT)
+                draw.DrawText("Scannez le QR code ->",  "RFS:Font:3D2D:05", padX + 14, cardY + 42, grey3, TEXT_ALIGN_LEFT)
+
+                -- QR code à droite
+                surface.SetMaterial(RFS.Materials["qrbolt"])
+                surface.SetDrawColor(255, 255, 255, 255)
+                surface.DrawTexturedRect(qrX, qrY, qrSize, qrSize)
             end
 
             --[[ Down button to change step ]]
-            local checkMouse = RFS.CheckMouse(self, 0, pos, ang, halfSizeX-100, 450, 200, 50, 0.1, buttons["nextStep"]["func"])
+            local isStep8 = self.RFSInfo["stepId"] == 8
+            local btnY2   = isStep8 and 480 or 450
+            local lineY2  = isStep8 and 460 or 430
+            local textY2  = isStep8 and 492 or 462
+
+            local checkMouse = RFS.CheckMouse(self, 0, pos, ang, halfSizeX-100, btnY2, 200, 50, 0.1, buttons["nextStep"]["func"])
 
             self.lerpButton = self.lerpButton or 0
             self.lerpButton = Lerp(frameTime*5, self.lerpButton, (checkMouse and 255 or 200))
@@ -695,7 +717,7 @@ function ENT:Draw()
 
             local btnColor = ColorAlpha(RFS.Colors["orange"], self.lerpButton)
 
-            draw.RoundedBox(8, halfSizeX-100, 450, 200, 50, btnColor)
+            draw.RoundedBox(8, halfSizeX-100, btnY2, 200, 50, btnColor)
 
             local buttonText = "startOrder"
             if self.RFSInfo["stepId"] == 1 then
@@ -712,10 +734,10 @@ function ENT:Draw()
                 buttonText = "closeMenu"
             end
 
-            draw.DrawText(RFS.GetSentence(buttonText):format(RFS.formatMoney(self:GetTotalOrderPrice())), "RFS:Font:3D2D:03", halfSizeX, 462, RFS.Colors["white"], TEXT_ALIGN_CENTER)
+            draw.DrawText(RFS.GetSentence(buttonText):format(RFS.formatMoney(self:GetTotalOrderPrice())), "RFS:Font:3D2D:03", halfSizeX, textY2, RFS.Colors["white"], TEXT_ALIGN_CENTER)
 
             --[[ Bottom line ]]
-            draw.RoundedBox(8, halfSizeX-150, 430, 300, 1, RFS.Colors["grey"])
+            draw.RoundedBox(8, halfSizeX-150, lineY2, 300, 1, RFS.Colors["grey"])
 
             self:DrawMouse(0.1)
 
