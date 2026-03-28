@@ -5,6 +5,130 @@
 
 include("shared.lua")
 
+
+--[[ Popup de saisie dans le thème du terminal ]]
+local boltInputFrame
+local function OpenBoltInput(title, placeholder, isPassword, callback)
+    if IsValid(boltInputFrame) then boltInputFrame:Remove() end
+
+    local fw = RFS.ScrW * 0.28
+    local fh = RFS.ScrH * 0.26
+
+    boltInputFrame = vgui.Create("DFrame")
+    boltInputFrame:SetSize(fw, fh)
+    boltInputFrame:SetPos(RFS.ScrW * 0.5 - fw * 0.5, RFS.ScrW * 1.5)
+    boltInputFrame:MoveTo(boltInputFrame:GetX(), RFS.ScrH * 0.5 - fh * 0.5, 0.35, 0, 1)
+    boltInputFrame:ShowCloseButton(false)
+    boltInputFrame:SetDraggable(false)
+    boltInputFrame:SetTitle("")
+    boltInputFrame:MakePopup()
+    boltInputFrame.startTime = SysTime()
+    boltInputFrame.Paint = function(self, w, h)
+        Derma_DrawBackgroundBlur(self, self.startTime)
+        draw.RoundedBox(8, 0, 0, w, h, RFS.Colors["white246"])
+        draw.DrawText(title, "RFS:Font:04", w * 0.5, h * 0.07, RFS.Colors["grey2"], TEXT_ALIGN_CENTER)
+        draw.RoundedBox(4, w * 0.5 - w * 0.4, h * 0.22, w * 0.8, 1, RFS.Colors["grey4"])
+    end
+
+    -- Champ de saisie
+    local showPass = false
+    local eyeBtnW = isPassword and math.Round(fh * 0.2) or 0
+
+    local entryBg = vgui.Create("DPanel", boltInputFrame)
+    entryBg:SetPos(fw * 0.08, fh * 0.32)
+    entryBg:SetSize(fw * 0.84, fh * 0.22)
+
+    local entry = vgui.Create("DTextEntry", entryBg)
+    entry:Dock(FILL)
+    entry:DockMargin(RFS.ScrH * 0.01, RFS.ScrH * 0.008, isPassword and (eyeBtnW + 6) or RFS.ScrH * 0.01, RFS.ScrH * 0.008)
+    entry:SetFont("RFS:Font:03")
+    entry:SetPlaceholderText(placeholder)
+    entry:SetDrawLanguageID(false)
+    entry.Paint = function(self, w, h)
+        draw.RoundedBox(0, 0, 0, w, h, Color(0, 0, 0, 0))
+        if isPassword then
+            local val = self:GetValue()
+            local font = "RFS:Font:03"
+            surface.SetFont(font)
+            local _, textH = surface.GetTextSize("A")
+            local cy = math.Round(h * 0.5 - textH * 0.5)
+            if val == "" then
+                draw.DrawText(placeholder, font, w * 0.5, cy, Color(150, 150, 150), TEXT_ALIGN_CENTER)
+            elseif showPass then
+                draw.DrawText(val, font, w * 0.5, cy, RFS.Colors["grey2"], TEXT_ALIGN_CENTER)
+            else
+                draw.DrawText(string.rep("*", #val), font, w * 0.5, cy, RFS.Colors["grey2"], TEXT_ALIGN_CENTER)
+            end
+        else
+            self:DrawTextEntryText(RFS.Colors["grey2"], Color(0, 218, 90), RFS.Colors["grey2"])
+        end
+    end
+
+    -- Bordure verte sur le conteneur quand le champ a le focus
+    entryBg.Paint = function(self, w, h)
+        draw.RoundedBox(6, 0, 0, w, h, entry:HasFocus() and Color(0, 218, 90) or Color(210, 210, 210))
+        draw.RoundedBox(6, 1, 1, w - 2, h - 2, Color(242, 242, 242))
+    end
+
+    -- Bouton œil pour afficher/masquer le mot de passe
+    if isPassword then
+        local entryBgH = math.Round(fh * 0.22)
+        local eyeBtn = vgui.Create("DButton", entryBg)
+        eyeBtn:SetPos(math.Round(fw * 0.84) - eyeBtnW - 4, 4)
+        eyeBtn:SetSize(eyeBtnW, entryBgH - 8)
+        eyeBtn:SetText("")
+        eyeBtn.Paint = function(self, w, h)
+            local cx, cy = w * 0.5, h * 0.5
+            local ew = math.Round(w * 0.75)
+            local eh = math.Round(h * 0.42)
+            local ex = math.Round(cx - ew * 0.5)
+            local ey = math.Round(cy - eh * 0.5)
+            local col = showPass and Color(0, 218, 90) or Color(140, 140, 140)
+            -- contour de l'œil
+            draw.RoundedBox(math.Round(eh * 0.5), ex, ey, ew, eh, col)
+            -- intérieur blanc
+            draw.RoundedBox(math.Round(eh * 0.5) - 1, ex + 1, ey + 1, ew - 2, eh - 2, Color(242, 242, 242))
+            -- pupille
+            local pr = math.Round(eh * 0.32)
+            draw.RoundedBox(pr, math.Round(cx - pr), math.Round(cy - pr), pr * 2, pr * 2, col)
+            -- barre diagonale si masqué
+            if not showPass then
+                surface.SetDrawColor(140, 140, 140, 200)
+                surface.DrawLine(math.Round(cx - ew * 0.3), math.Round(cy + eh * 0.4), math.Round(cx + ew * 0.3), math.Round(cy - eh * 0.4))
+            end
+        end
+        eyeBtn.DoClick = function()
+            showPass = not showPass
+            entry:RequestFocus()
+        end
+    end
+
+    entry:RequestFocus()
+
+    local function confirm()
+        local val = entry:GetValue()
+        boltInputFrame:MoveTo(boltInputFrame:GetX(), RFS.ScrW * 1.5, 0.3, 0, 1, function()
+            if IsValid(boltInputFrame) then boltInputFrame:Remove() end
+        end)
+        if isfunction(callback) then callback(val) end
+    end
+
+    entry.OnEnter = confirm
+
+    -- Bouton Confirmer (orange terminal)
+    local lerpConfirm = 0
+    local confirmBtn = vgui.Create("DButton", boltInputFrame)
+    confirmBtn:SetPos(fw * 0.08, fh * 0.63)
+    confirmBtn:SetSize(fw * 0.84, fh * 0.22)
+    confirmBtn:SetText("")
+    confirmBtn.Paint = function(self, w, h)
+        lerpConfirm = Lerp(FrameTime() * 5, lerpConfirm, self:IsHovered() and 255 or 220)
+        draw.RoundedBox(4, 0, 0, w, h, ColorAlpha(RFS.Colors["orange"], lerpConfirm))
+        draw.DrawText("Confirmer", "RFS:Font:03", w * 0.5, h * 0.5 - RFS.ScrH * 0.013, RFS.Colors["white"], TEXT_ALIGN_CENTER)
+    end
+    confirmBtn.DoClick = confirm
+end
+
 --[[ All action of buttons ]]
 local buttons = {
     ["nextStep"] = {
@@ -66,6 +190,9 @@ local buttons = {
             elseif ent.RFSInfo["stepId"] == 6 then
                 ent.RFSInfo["stepId"] = 1
                 RFS.TerminalSelected = nil
+                return
+            elseif ent.RFSInfo["stepId"] == 8 then
+                ent.RFSInfo["stepId"] = 5
                 return
             end
 
@@ -164,6 +291,44 @@ local buttons = {
             ent.RFSInfo["cguAccepted"] = not ent.RFSInfo["cguAccepted"]
         end,
     },
+    ["viewCGU"] = {
+        ["func"] = function(ent)
+            RFS.Terminal.OpenCGUPopup()
+        end,
+    },
+    ["boltLogin"] = {
+        ["func"] = function(ent)
+            ent.RFSInfo["boltEmail"] = ent.RFSInfo["boltEmail"] or ""
+            ent.RFSInfo["boltPass"]  = ent.RFSInfo["boltPass"]  or ""
+            ent.RFSInfo["stepId"] = 8
+        end,
+    },
+    ["boltEditEmail"] = {
+        ["func"] = function(ent)
+            OpenBoltInput("Adresse email", "Jason.Reed@gmail.com", false, function(str)
+                ent.RFSInfo["boltEmail"] = str
+            end)
+        end,
+    },
+    ["boltEditPass"] = {
+        ["func"] = function(ent)
+            OpenBoltInput("Mot de passe", "Mot de passe", true, function(str)
+                ent.RFSInfo["boltPass"] = str
+            end)
+        end,
+    },
+    ["boltSubmit"] = {
+        ["func"] = function(ent)
+            local email = ent.RFSInfo["boltEmail"] or ""
+            local pass  = ent.RFSInfo["boltPass"]  or ""
+            if email == "" or pass == "" then
+                RFS.Notification(5, "Veuillez remplir tous les champs.")
+                return
+            end
+            -- TODO : connexion Firebase
+            RFS.Notification(3, "Connexion Firebase bientot disponible !")
+        end,
+    },
     ["changeDuration"] = {
         ["func"] = function(ent, args)
             ent.RFSInfo["currentCommand"] = ent.RFSInfo["currentCommand"] or {}
@@ -250,7 +415,7 @@ function ENT:Draw()
 	
 	ang:RotateAroundAxis(ang:Forward(), 90)
 	ang:RotateAroundAxis(ang:Right(), -180)
-    
+
     RFS.Start3D2D(pos, ang, 0.1)
         local sizeX, sizeY = 370, 545
         local halfSizeX = sizeX/2
@@ -277,7 +442,7 @@ function ENT:Draw()
                                                                                                                                                                                                                                                                                                                                                                                                                                                        -- cc730fea56651a2f58f71217edee9cc3d8e88105144a63103b4cdff76fc2b0b3
 
             self.lerpText = self.lerpText or 0
-            self.lerpText = Lerp(frameTime*5, self.lerpText, (self.RFSInfo["stepId"] == 2 and 0 or self.RFSInfo["stepId"] == 3 and -200 or self.RFSInfo["stepId"] == 4 and -400 or self.RFSInfo["stepId"] == 5 and -600 or self.RFSInfo["stepId"] == 6 and -800 or 200))
+            self.lerpText = Lerp(frameTime*5, self.lerpText, (self.RFSInfo["stepId"] == 2 and 0 or self.RFSInfo["stepId"] == 3 and -200 or self.RFSInfo["stepId"] == 4 and -400 or self.RFSInfo["stepId"] == 5 and -600 or self.RFSInfo["stepId"] == 6 and -800 or self.RFSInfo["stepId"] == 8 and -600 or 200))
             
             surface.SetMaterial(RFS.Materials["burger"])
             surface.SetDrawColor(RFS.Colors["white"])
@@ -423,7 +588,10 @@ function ENT:Draw()
                     accessUsers = RFS.Terminal.GetTerminalSetting(self, "users") or {}
                 end
 
-                if true then
+                local lp = RFS.LocalPlayer
+                local isTerminalOwner = IsValid(lp) and RFS.GetOwner(self) == lp
+                local isRFSAdmin     = IsValid(lp) and RFS.AdminRank[lp:GetUserGroup()]
+                if isTerminalOwner or isRFSAdmin then
                     local checkMouse = RFS.CheckMouse(self, 0, pos, ang, 300, 20, 45, 45, 0.1, buttons["settings"]["func"])
             
                     self.lerpRotated = self.lerpRotated or 0
@@ -474,6 +642,74 @@ function ENT:Draw()
                 end
             end
                 
+            --[[ Login Bolt (step 8) — lerp dédié, indépendant de lerpText ]]
+            self.lerpLogin = Lerp(frameTime * 5, self.lerpLogin or 0, self.RFSInfo["stepId"] == 8 and 1 or 0)
+            if self.lerpLogin > 0.01 then
+                -- Slide depuis le bas : lerpLogin 0→1 = offset sizeY→0
+                local lo = math.Round((1 - self.lerpLogin) * sizeY)
+
+                local boltGreen  = Color(0, 218, 90)
+                local black      = Color(30, 30, 30)
+                local grey3      = Color(160, 160, 160)
+                local greyLight  = Color(242, 242, 242)
+                local greyBorder = Color(210, 210, 210)
+                local padX       = 28
+                local fieldW     = sizeX - padX * 2   -- 314 px centré
+                local fieldH     = 45
+
+                -- Fond blanc
+                draw.RoundedBox(0, 0, lo, sizeX, sizeY + 50, RFS.Colors["white246"])
+
+                -- Header vert
+                draw.RoundedBox(0, 0, lo, sizeX, 115, boltGreen)
+
+                -- Icône burger centrée dans le header
+                surface.SetMaterial(RFS.Materials["burger"])
+                surface.SetDrawColor(RFS.Colors["white"])
+                surface.DrawTexturedRect(halfSizeX - 26, 14 + lo, 52, 52)
+
+                -- Titres
+                draw.DrawText("Se connecter", "RFS:Font:3D2D:01", halfSizeX, 72  + lo, RFS.Colors["white"], TEXT_ALIGN_CENTER)
+                draw.DrawText("avec Bolt",    "RFS:Font:3D2D:03", halfSizeX, 124 + lo, boltGreen,           TEXT_ALIGN_CENTER)
+
+                -- Séparateur
+                draw.RoundedBox(1, padX, 157 + lo, fieldW, 1, greyBorder)
+
+                -- ── Email ──
+                draw.DrawText("Email", "RFS:Font:3D2D:04", padX, 165 + lo, grey3, TEXT_ALIGN_LEFT)
+                local emailVal   = self.RFSInfo["boltEmail"] or ""
+                local checkEmail = RFS.CheckMouse(self, 8, pos, ang, padX, 181 + lo, fieldW, fieldH, 0.1, buttons["boltEditEmail"]["func"])
+                draw.RoundedBox(6, padX,     181 + lo, fieldW,     fieldH, checkEmail and boltGreen or greyBorder)
+                draw.RoundedBox(6, padX + 1, 182 + lo, fieldW - 2, fieldH - 2, greyLight)
+                local emailTxt = emailVal == "" and "Jason.Reed@gmail.com" or emailVal
+                draw.DrawText(emailTxt, "RFS:Font:3D2D:04", padX + 10, 181 + lo + (fieldH - 15) / 2, emailVal == "" and grey3 or black, TEXT_ALIGN_LEFT)
+
+                -- ── Mot de passe ──
+                local passY = 181 + fieldH + 16    -- 242
+                draw.DrawText("Mot de passe", "RFS:Font:3D2D:04", padX, passY + lo, grey3, TEXT_ALIGN_LEFT)
+                local passVal   = self.RFSInfo["boltPass"] or ""
+                local checkPass = RFS.CheckMouse(self, 8, pos, ang, padX, passY + 16 + lo, fieldW, fieldH, 0.1, buttons["boltEditPass"]["func"])
+                draw.RoundedBox(6, padX,     passY + 16 + lo, fieldW,     fieldH, checkPass and boltGreen or greyBorder)
+                draw.RoundedBox(6, padX + 1, passY + 17 + lo, fieldW - 2, fieldH - 2, greyLight)
+                local passTxt = passVal == "" and "Mot de passe" or string.rep("*", math.min(#passVal, 24))
+                draw.DrawText(passTxt, "RFS:Font:3D2D:04", padX + 10, passY + 16 + lo + (fieldH - 15) / 2, passVal == "" and grey3 or black, TEXT_ALIGN_LEFT)
+
+                -- ── Bouton Se connecter ──
+                local btnY = passY + 16 + fieldH + 18   -- 321
+                local btnH = 46
+                local checkSubmit = RFS.CheckMouse(self, 8, pos, ang, padX, btnY + lo, fieldW, btnH, 0.1, buttons["boltSubmit"]["func"])
+                self.lerpBoltSubmit = Lerp(frameTime * 6, self.lerpBoltSubmit or 0, checkSubmit and 1 or 0)
+                local submitG = math.Round(Lerp(self.lerpBoltSubmit, 218, 192))
+                local submitB = math.Round(Lerp(self.lerpBoltSubmit, 90, 72))
+                draw.RoundedBox(8, padX + 2, btnY + 3 + lo, fieldW, btnH, Color(0, 0, 0, 20))
+                draw.RoundedBox(8, padX,     btnY     + lo, fieldW, btnH, Color(0, submitG, submitB))
+                -- Font 3D2D:03 = taille 25 → centré dans h=46 : (46-25)/2 = 10
+                draw.DrawText("Se connecter", "RFS:Font:3D2D:03", halfSizeX, btnY + 10 + lo, RFS.Colors["white"], TEXT_ALIGN_CENTER)
+
+                -- Note Firebase
+                draw.DrawText("Connexion Firebase bientot disponible", "RFS:Font:3D2D:05", halfSizeX, btnY + btnH + 14 + lo, grey3, TEXT_ALIGN_CENTER)
+            end
+
             --[[ Down button to change step ]]
             local checkMouse = RFS.CheckMouse(self, 0, pos, ang, halfSizeX-100, 450, 200, 50, 0.1, buttons["nextStep"]["func"])
 
@@ -499,6 +735,8 @@ function ENT:Draw()
                 buttonText = "payOrder"
             elseif self.RFSInfo["stepId"] == 6 then
                 buttonText = "close"
+            elseif self.RFSInfo["stepId"] == 8 then
+                buttonText = "closeMenu"
             end
 
             draw.DrawText(RFS.GetSentence(buttonText):format(RFS.formatMoney(self:GetTotalOrderPrice())), "RFS:Font:3D2D:03", halfSizeX, 462, RFS.Colors["white"], TEXT_ALIGN_CENTER)
@@ -591,9 +829,17 @@ function ENT:Draw()
                         end
                         -- Texte
                         surface.SetFont("RFS:Font:3D2D:05")
-                        local tw = surface.GetTextSize("Accepter les ")
+                        local tw  = surface.GetTextSize("Accepter les ")
+                        local twc = surface.GetTextSize("conditions d'utilisation")
+                        local linkX = cbX + cbSize + 6 + tw
+                        local linkY = cbY + 3
+                        local linkH = 14
+                        local hoverCGU = RFS.CheckMouse(self, 5, pos, ang, linkX, linkY, twc, linkH, 0.1, buttons["viewCGU"]["func"])
+                        local linkCol = hoverCGU and Color(30, 150, 90) or Color(50, 187, 120)
                         draw.DrawText("Accepter les ", "RFS:Font:3D2D:05", cbX + cbSize + 6, cbY + 3, black, TEXT_ALIGN_LEFT)
-                        draw.DrawText("conditions d'utilisation", "RFS:Font:3D2D:05", cbX + cbSize + 6 + tw, cbY + 3, Color(50, 187, 120), TEXT_ALIGN_LEFT)
+                        draw.DrawText("conditions d'utilisation", "RFS:Font:3D2D:05", linkX, linkY, linkCol, TEXT_ALIGN_LEFT)
+                        -- Soulignement
+                        draw.RoundedBox(0, linkX, linkY + linkH, twc, 1, linkCol)
                     else
                         local replacementTitle = RFS.GetSentence("burger")
                         if v.fries and v.fries > 0 then
@@ -614,12 +860,20 @@ function ENT:Draw()
                     draw.DrawText("Profitez d'avantages exclusifs en vous", "RFS:Font:3D2D:05", halfSizeX, loginY, RFS.Colors["grey"], TEXT_ALIGN_CENTER)
                     draw.DrawText("connectant à votre compte Bolt", "RFS:Font:3D2D:05", halfSizeX, loginY + 16, RFS.Colors["grey"], TEXT_ALIGN_CENTER)
 
-                    -- Ombre du bouton (box-shadow CSS)
                     local bX, bY, bW, bH = halfSizeX - 95, loginY + 36, 190, 40
+
+                    -- Interactivité
+                    local checkBolt = RFS.CheckMouse(self, 5, pos, ang, bX, bY, bW, bH, 0.1, buttons["boltLogin"]["func"])
+                    self.lerpBolt = Lerp(frameTime * 6, self.lerpBolt or 0, checkBolt and 1 or 0)
+
+                    -- Ombre du bouton (box-shadow CSS)
                     draw.RoundedBox(8, bX + 2, bY + 4, bW, bH, Color(0, 0, 0, 25))
 
-                    -- Bouton vert (#00DA5A)
-                    draw.RoundedBox(8, bX, bY, bW, bH, Color(0, 218, 90))
+                    -- Bouton vert avec hover (#00DA5A → #00C050)
+                    local boltR = math.Round(Lerp(self.lerpBolt, 0, 0))
+                    local boltG = math.Round(Lerp(self.lerpBolt, 218, 192))
+                    local boltB = math.Round(Lerp(self.lerpBolt, 90, 72))
+                    draw.RoundedBox(8, bX, bY, bW, bH, Color(boltR, boltG, boltB))
 
                     -- Icône burger à gauche dans le bouton
                     surface.SetMaterial(RFS.Materials["burger"])
@@ -635,172 +889,77 @@ function ENT:Draw()
             render.SetStencilEnable(false)
         end
 
-        --[[ Truck loader Uiverse (vinodjangid07) — dessiné EN DERNIER, au premier plan ]]
+        --[[ Loader spinner standard — affiché au premier plan lors du paiement ]]
         if self.loaderActive then
-            local t      = CurTime()
+            local t       = CurTime()
             local elapsed = t - (self.loaderStartTime or t)
 
-            -- Stencil clippé au panneau terminal
-            render.SetStencilWriteMask(0xFF)
-            render.SetStencilTestMask(0xFF)
-            render.SetStencilReferenceValue(0)
-            render.SetStencilPassOperation(STENCIL_KEEP)
-            render.SetStencilZFailOperation(STENCIL_KEEP)
-            render.ClearStencil()
-            render.SetStencilEnable(true)
-            render.SetStencilReferenceValue(1)
-            render.SetStencilCompareFunction(STENCIL_NEVER)
-            render.SetStencilFailOperation(STENCIL_REPLACE)
-                draw.RoundedBox(0, 0, 0, sizeX, sizeY, RFS.Colors["white"])
-            render.SetStencilCompareFunction(STENCIL_EQUAL)
-            render.SetStencilFailOperation(STENCIL_KEEP)
+            -- Fond semi-transparent
+            draw.RoundedBox(0, 0, 0, sizeX, sizeY, Color(255, 255, 255, 230))
 
-                -- Fond blanc (comme le CSS original — fond page blanche)
-                draw.RoundedBox(0, 0, 0, sizeX, sizeY, Color(255, 255, 255, 250))
+            -- ============================================================
+            -- SPINNER CIRCULAIRE
+            -- ============================================================
+            local cx  = halfSizeX
+            local cy  = sizeY / 2 - 30
+            local R   = 36        -- rayon extérieur
+            local sw  = 7         -- épaisseur du trait
+            local arc = 270       -- degrés d'arc affiché
+            local spd = 360       -- degrés par seconde
 
-                -- ============================================================
-                -- CONSTANTES DE LAYOUT
-                -- SVG truck viewBox = 198×93, affiché à 195px → scale ≈ 0.985
-                -- ============================================================
-                local s      = 195.0 / 198.0   -- ~0.985 : SVG unit → pixel
-                local roadY  = 325              -- Y de la ligne de route
-                local truckH = 93 * s           -- hauteur affichée du SVG camion (~91.6px)
-                local tx     = halfSizeX - 97.5 -- bord gauche du SVG (195px centré)
-                local ty0    = roadY - 6 - truckH -- bord haut du SVG (margin-bottom:6px)
+            local angle = (t * spd) % 360
 
-                -- Bounce: 0→3px→0 sur 1 s (keyframes motion CSS)
-                local bounce = 3 * (1 - math.cos(t * math.pi * 2)) / 2
-                local ty = ty0 + bounce  -- uniquement sur la caisse, pas les roues
-
-                -- helper : dessine un cercle rempli
-                local function circle(cx, cy, r, col)
-                    surface.SetDrawColor(col)
-                    local pts = {}
-                    for a = 0, 354, 6 do
-                        pts[#pts+1] = {x = cx + math.cos(math.rad(a))*r, y = cy + math.sin(math.rad(a))*r}
-                    end
-                    surface.DrawPoly(pts)
+            -- Cercle de fond (gris clair)
+            surface.SetDrawColor(Color(220, 220, 220))
+            local bgPts = {}
+            for a = 0, 358, 2 do
+                local rad = math.rad(a)
+                for _, rv in ipairs({R, R - sw}) do
+                    bgPts[#bgPts+1] = {x = cx + math.cos(rad)*rv, y = cy + math.sin(rad)*rv}
                 end
+            end
+            -- anneau fond via triangles
+            for a = 0, 356, 2 do
+                local r1 = math.rad(a)
+                local r2 = math.rad(a + 2)
+                surface.SetDrawColor(Color(220, 220, 220))
+                surface.DrawPoly({
+                    {x = cx + math.cos(r1)*R,      y = cy + math.sin(r1)*R},
+                    {x = cx + math.cos(r2)*R,      y = cy + math.sin(r2)*R},
+                    {x = cx + math.cos(r2)*(R-sw), y = cy + math.sin(r2)*(R-sw)},
+                    {x = cx + math.cos(r1)*(R-sw), y = cy + math.sin(r1)*(R-sw)},
+                })
+            end
 
-                -- ============================================================
-                -- CAISSE PRINCIPALE (rect x=6.5 y=1.5 w=121 h=90 fill=#DFDFDF stroke=#282828 sw=3)
-                -- ============================================================
-                local cx0  = tx + 6.5*s
-                local cy0  = ty + 1.5*s
-                local cw0  = 121*s
-                local ch0  = 90*s
-                draw.RoundedBox(3, cx0-1.5, cy0-1.5, cw0+3, ch0+3, Color(40,40,40))
-                draw.RoundedBox(3, cx0, cy0, cw0, ch0, Color(223,223,223))
+            -- Arc coloré (orange RFS)
+            local col = RFS.Colors["orange"] or Color(255, 140, 0)
+            for a = 0, arc - 2, 2 do
+                local r1 = math.rad(angle + a)
+                local r2 = math.rad(angle + a + 2)
+                -- dégradé d'opacité : plus opaque en tête
+                local alpha = math.floor(80 + 175 * (a / arc))
+                surface.SetDrawColor(ColorAlpha(col, alpha))
+                surface.DrawPoly({
+                    {x = cx + math.cos(r1)*R,      y = cy + math.sin(r1)*R},
+                    {x = cx + math.cos(r2)*R,      y = cy + math.sin(r2)*R},
+                    {x = cx + math.cos(r2)*(R-sw), y = cy + math.sin(r2)*(R-sw)},
+                    {x = cx + math.cos(r1)*(R-sw), y = cy + math.sin(r1)*(R-sw)},
+                })
+            end
 
-                -- Petite rect arrière (x=1 y=84 w=6 h=4 fill=#DFDFDF stroke=#282828 sw=2)
-                draw.RoundedBox(2, tx+1*s-1,  ty+84*s-1, 6*s+2, 4*s+2, Color(40,40,40))
-                draw.RoundedBox(2, tx+1*s,    ty+84*s,   6*s,   4*s,   Color(223,223,223))
+            -- ============================================================
+            -- TEXTE + BARRE DE PROGRESSION
+            -- ============================================================
+            local dots  = string.rep(".", math.floor(elapsed * 2) % 4)
+            local textY = cy + R + 18
+            draw.DrawText("Paiement en cours" .. dots, "RFS:Font:3D2D:04", halfSizeX, textY, Color(40, 40, 40), TEXT_ALIGN_CENTER)
 
-                -- ============================================================
-                -- CABINE ROUGE (path ≈ x=132.5 y=22.5 w=60 h=69 fill=#F83D3D stroke=#282828 sw=3)
-                -- ============================================================
-                local cabx = tx + 132.5*s
-                local caby = ty + 22.5*s
-                local cabw = 60*s
-                local cabh = 69*s
-                draw.RoundedBox(3, cabx-1.5, caby-1.5, cabw+3, cabh+3, Color(40,40,40))
-                draw.RoundedBox(3, cabx, caby, cabw, cabh, Color(248,61,61))
+            local barW = 200
+            local barY = textY + 28
+            draw.RoundedBox(4, halfSizeX - barW/2, barY, barW,                              6, Color(200, 200, 200))
+            draw.RoundedBox(4, halfSizeX - barW/2, barY, barW * math.Clamp(elapsed/4,0,1), 6, col)
 
-                -- ============================================================
-                -- VITRE (path ≈ x=143.5 y=33.5 w=47 h=22 fill=#7D7C7C stroke=#282828 sw=3)
-                -- ============================================================
-                local wx0 = tx + 143.5*s
-                local wy0 = ty + 33.5*s
-                local ww0 = 47*s
-                local wh0 = 22*s
-                draw.RoundedBox(2, wx0-1, wy0-1, ww0+2, wh0+2, Color(40,40,40))
-                draw.RoundedBox(2, wx0, wy0, ww0, wh0, Color(125,124,124))
-
-                -- ============================================================
-                -- PHARE (rect x=187 y=63 w=5 h=7 fill=#FFFCAB stroke=#282828 sw=2)
-                -- ============================================================
-                draw.RoundedBox(1, tx+187*s-1, ty+63*s-1, 5*s+2, 7*s+2, Color(40,40,40))
-                draw.RoundedBox(1, tx+187*s,   ty+63*s,   5*s,   7*s,   Color(255,252,171))
-
-                -- ============================================================
-                -- PARE-CHOC AVANT (rect x=193 y=81 w=4 h=11 fill=#282828 sw=2)
-                -- ============================================================
-                draw.RoundedBox(1, tx+193*s, ty+81*s, 4*s, 11*s, Color(40,40,40))
-
-                -- Petite roue de secours / enjoliveur (path circle ≈ cx=146.5 cy=65 r=3.5)
-                circle(tx + 146.5*s, ty + 65*s, 3.5*s, Color(40,40,40))
-
-                -- ============================================================
-                -- PNEUS  (SVG 30×30 viewBox, CSS display=24px → mon scale=1.5 → 36px)
-                -- outer circle r=13.5, inner (jante) r=7, stroke sw=3
-                -- ============================================================
-                local tsc   = 36.0 / 30.0   -- 1.2 : SVG unit → pixel
-                local tRout = 13.5 * tsc     -- 16.2 px
-                local tRin  =  7   * tsc     --  8.4 px
-                -- Les pneus ne rebondissent PAS (position absolute bottom:0 dans le CSS)
-                local tireY = roadY - tRout  -- centre Y des pneus (assis sur la route)
-                -- Centre X des deux pneus (déduit du CSS padding du div truckTires)
-                local tireL = tx + 22.5 + tRout   -- padding-left:15px*1.5 + rayon
-                local tireR = tx + 195 - 15 - tRout -- 195 - padding-right:10*1.5 - rayon
-
-                local function drawTire(tcx, tcy)
-                    -- contour stroke sw=3 → halo +1.5
-                    circle(tcx, tcy, tRout + 1.5, Color(40,40,40))
-                    -- pneu noir (fill #282828)
-                    circle(tcx, tcy, tRout,        Color(40,40,40))
-                    -- jante grise (#DFDFDF)
-                    circle(tcx, tcy, tRin,         Color(223,223,223))
-                end
-                drawTire(tireL, tireY)
-                drawTire(tireR, tireY)
-
-                -- ============================================================
-                -- ROUTE — 1.5px height, couleur #282828, pleine largeur
-                -- ============================================================
-                draw.RoundedBox(3, 0, roadY, sizeX, 2, Color(40,40,40))
-
-                -- Tirets animés (road::before / ::after)
-                -- roadAnimation: translateX(0)→translateX(-350px) en 1.4s → 250px/s
-                local roadSpeed = 350.0 / 1.4  -- 250 px/s
-                local dashOff   = (t * roadSpeed) % 50
-                for i = -1, math.ceil(sizeX / 50) + 1 do
-                    local dx = i * 50 - dashOff
-                    if dx > -15 and dx < sizeX + 5 then
-                        draw.RoundedBox(2, dx, roadY - 1, 10, 3, Color(255,255,255))
-                    end
-                end
-
-                -- ============================================================
-                -- LAMPADAIRE SVG (simplifié) — animate roadAnimation 1.4s
-                -- CSS: bottom:0 right:-90%  height:90px
-                -- ============================================================
-                local lampH     = 90             -- hauteur CSS → ~90px dans mon espace
-                local lampSpeed = roadSpeed      -- même vitesse que la route
-                local lampCycle = sizeX + 250    -- distance de cycle pour loop propre
-                local lampX     = sizeX + 120 - ((t * lampSpeed) % lampCycle)
-
-                -- Fût vertical (pied)
-                draw.RoundedBox(2, lampX + 12, roadY - lampH, 5, lampH, Color(40,40,40))
-                -- Bras horizontal
-                draw.RoundedBox(2, lampX,      roadY - lampH, 30, 4,    Color(40,40,40))
-                -- Globe extérieur
-                circle(lampX + 4, roadY - lampH - 9, 9, Color(40,40,40))
-                -- Lueur intérieure (blanc/jaune pâle)
-                circle(lampX + 4, roadY - lampH - 9, 5, Color(255,252,220))
-
-                -- ============================================================
-                -- TEXTE "Paiement en cours..." + BARRE DE PROGRESSION
-                -- ============================================================
-                local dots    = string.rep(".", math.floor(elapsed * 2) % 4)
-                local barW2   = 200
-                local barY2   = roadY + 20
-                draw.DrawText("Paiement en cours" .. dots, "RFS:Font:3D2D:04", halfSizeX, roadY + 6, Color(40,40,40), TEXT_ALIGN_CENTER)
-                draw.RoundedBox(4, halfSizeX - barW2/2, barY2, barW2,                     6, Color(200,200,200))
-                draw.RoundedBox(4, halfSizeX - barW2/2, barY2, barW2 * math.Clamp(elapsed/4,0,1), 6, Color(50,187,120))
-
-                self:DrawMouse(0.1)
-
-            render.SetStencilEnable(false)
+            self:DrawMouse(0.1)
         end
 
     RFS.End3D2D()

@@ -367,6 +367,54 @@ function RFS.Terminal.Settings(terminal)
     end
 end
 
+--[[ Popup conditions d'utilisation (même style que le panel settings) ]]
+local cguFrame
+function RFS.Terminal.OpenCGUPopup()
+    if IsValid(cguFrame) then cguFrame:Remove() end
+
+    local sw, sh = RFS.ScrW, RFS.ScrH
+    local fw, fh = sw * 0.45, sh * 0.75
+
+    cguFrame = vgui.Create("DFrame")
+    cguFrame:SetSize(fw, fh)
+    cguFrame:SetPos(sw * 0.5 - fw * 0.5, sw * 1.5)
+    cguFrame:MoveTo(sw * 0.5 - fw * 0.5, sh * 0.5 - fh * 0.5, 0.5, 0, 1)
+    cguFrame:ShowCloseButton(false)
+    cguFrame:SetDraggable(false)
+    cguFrame:SetTitle("")
+    cguFrame:MakePopup()
+    cguFrame.startTime = SysTime()
+    cguFrame.Paint = function(self, w, h)
+        Derma_DrawBackgroundBlur(self, self.startTime)
+        draw.RoundedBox(4, 0, 0, w, h, RFS.Colors["white246"])
+        draw.DrawText("Conditions d'utilisation", "RFS:Font:04", w / 2, h * 0.027, RFS.Colors["grey2"], TEXT_ALIGN_CENTER)
+        draw.RoundedBox(8, w * 0.05, h * 0.075, w * 0.9, 1, RFS.Colors["grey4"])
+    end
+
+    local html = vgui.Create("DHTML", cguFrame)
+    html:SetPos(fw * 0.025, fh * 0.09)
+    html:SetSize(fw * 0.95, fh * 0.8)
+    html:OpenURL(RFS.CGUPdfUrl or "about:blank")
+    html:SetAllowLua(false)
+
+    local lerpClose = 0
+    local closeBtn = vgui.Create("DButton", cguFrame)
+    closeBtn:SetSize(fw * 0.9, fh * 0.07)
+    closeBtn:SetPos(fw * 0.05, fh * 0.915)
+    closeBtn:SetFont("RFS:Font:04")
+    closeBtn:SetText(RFS.GetSentence("closeMenu"))
+    closeBtn:SetTextColor(RFS.Colors["white246"])
+    closeBtn.Paint = function(self, w, h)
+        lerpClose = Lerp(FrameTime() * 5, lerpClose, self:IsHovered() and 255 or 220)
+        draw.RoundedBox(4, 0, 0, w, h, ColorAlpha(RFS.Colors["orange"], lerpClose))
+    end
+    closeBtn.DoClick = function()
+        cguFrame:MoveTo(cguFrame:GetX(), sw * 1.5, 0.5, 0, 1, function()
+            if IsValid(cguFrame) then cguFrame:Remove() end
+        end)
+    end
+end
+
 --[[ Get setting with key of a terminal ]]
 function RFS.Terminal.GetTerminalSetting(terminal, key)
     local terminalIndex = terminal:EntIndex()

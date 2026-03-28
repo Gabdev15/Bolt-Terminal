@@ -78,6 +78,7 @@ RFS.Language["de"] = {
     ["commandAccepted"] = "Deine Bestellung wurde angeommen",
     ["notEnoughMoney"] = "Sie haben nicht genug Geld, um diese Aktion durchzuführen",
     ["savedSettingsTerminal"] = "Bildschirmeinstellungen wurden gespeichert!",
+    ["noAccess"] = "Sie haben keine Berechtigung, auf diese Einstellungen zuzugreifen",
     ["stock"] = "Bestand",
     ["claim"] = "STARTEN",
     ["finish"] = "BEENDEN",

@@ -80,6 +80,7 @@ RFS.Language["fr"] = {
 	["commandAccepted"] =  "Votre commande a été acceptée",
 	["notEnoughMoney"] =  "Vous n'avez pas assez d'argent pour effectuer cette action",
 	["savedSettingsTerminal"] =  "Les paramètres de votre terminal ont été sauvegardés",
+	["noAccess"] = "Vous n'avez pas la permission d'accéder à ces paramètres",
 	["stock"] =  "Stock",
 	["claim"] =  "CLAIM",
 	["finish"] =  "FINIR",

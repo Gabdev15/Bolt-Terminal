@@ -78,6 +78,7 @@ RFS.Language["jp"] = {
 	["commandAccepted"] =  "ご注文を受け付けました",
 	["notEnoughMoney"] =  "このアクションを実行するのに十分なお金がありません",
 	["savedSettingsTerminal"] =  "端末の設定が保存されました",
+	["noAccess"] = "この設定にアクセスする権限がありません",
 	["stock"] =  "ストック",
 	["claim"] =  "請求",
 	["finish"] =  "終了",

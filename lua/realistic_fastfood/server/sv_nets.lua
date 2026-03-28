@@ -162,7 +162,10 @@ net.Receive("RFS:MainNet", function(len, ply)
         local terminal = net.ReadEntity()
         if not IsValid(terminal) then return end
 
-        if not RFS.CanInteractTerminal(terminal, ply) then return end
+        if not RFS.CanInteractTerminal(terminal, ply) then
+            ply:RFSNotification(5, RFS.GetSentence("noAccess"))
+            return
+        end
                                                                                                                                                                                                                                                                                                                                                                                                                                                        -- cac3e41cd971a71c7f3ddee7a8048bfba941a4f0d8e62f4f2ce5f98de1f3ccf2
 
         if not ply:RFSCheckNearEntity(terminal, "rfs_terminal", 200) then

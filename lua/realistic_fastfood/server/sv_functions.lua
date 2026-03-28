@@ -407,11 +407,15 @@ function RFS.SendTerminalSettings(ply, terminal, moduleName)
     if IsValid(ply) then net.Send(ply) else net.Broadcast() end
 end
 
---[[ Check if the player can interact with the terminal ]]
+--[[ Check if the player can interact with the terminal (owner or admin/superadmin only) ]]
 function RFS.CanInteractTerminal(terminal, ply)
     if not IsValid(terminal) or terminal:GetClass() != "rfs_terminal" then return end
+    if not IsValid(ply) then return end
 
-    return true
+    if RFS.GetOwner(terminal) == ply then return true end
+    if RFS.AdminRank[ply:GetUserGroup()] then return true end
+
+    return false
 end
 
 --[[ Save screen settings ]]

@@ -78,6 +78,7 @@ RFS.Language["tr"] = {
 	["commandAccepted"] = "Emriniz kabul edildi",
 	["notEnoughMoney"] = "Bu eylemi gerçekleştirmek için yeterli paranız yok",
 	["savedSettingsTerminal"] = "Terminalinizin ayarları kaydedildi",
+	["noAccess"] = "Bu ayarlara erişim izniniz yok",
 	["stock"] = "Stok",
 	["claim"] = "İDDİA",
 	["finish"] = "BITIR",
