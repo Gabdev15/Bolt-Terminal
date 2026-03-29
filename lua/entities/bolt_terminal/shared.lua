@@ -5,8 +5,8 @@
 
 ENT.Base = "base_gmodentity" 
 ENT.Type = "anim"
-ENT.PrintName = "Terminal"
-ENT.Category = "Realistic Fastfood"
+ENT.PrintName = "Terminal Bolt"
+ENT.Category = "Bolt Terminal"
 ENT.Author = "gab_vsss"
 ENT.AutomaticFrameAdvance = true
 ENT.Spawnable = true
