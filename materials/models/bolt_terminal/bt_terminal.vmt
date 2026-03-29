@@ -1,0 +1,9 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/bolt_terminal/bt_terminal"
+	"$bumpmap" "models/bolt_terminal/bt_terminal_normal"
+	$phong 1
+  	$phongexponent 3
+    	$phongboost    0.025
+    	$phongfresnelranges    "[0.05 0.5 1]"
+}
