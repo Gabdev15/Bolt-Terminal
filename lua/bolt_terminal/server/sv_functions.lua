@@ -5,6 +5,37 @@
 
 local PLAYER = FindMetaTable("Player")
 
+--[[ Envoie une notification Discord lors d'un paiement au terminal ]]
+function BT.SendDiscordPayment(ply, vehicle, price)
+    if not BT.DiscordWebhook or BT.DiscordWebhook == "" then return end
+
+    local rpName = isfunction(ply.getDarkRPVar) and ply:getDarkRPVar("rpname") or ply:Nick()
+    local heure = os.date("%H:%M:%S")
+    local date = os.date("%d/%m/%Y")
+    local priceStr = BT.formatMoney and BT.formatMoney(price) or ("$" .. price)
+
+    local payload = util.TableToJSON({
+        embeds = {{
+            title = "💳 Nouveau paiement — Terminal Bolt",
+            color = 3447003,
+            fields = {
+                { name = "👤 Nom RP",    value = rpName,  inline = true },
+                { name = "🚗 Véhicule", value = vehicle,  inline = true },
+                { name = "💰 Prix",     value = priceStr, inline = true },
+                { name = "🕐 Heure",    value = heure .. " — " .. date, inline = false },
+            },
+            footer = { text = "Bolt Terminal" },
+        }}
+    })
+
+    HTTP({
+        url     = BT.DiscordWebhook,
+        method  = "POST",
+        body    = payload,
+        headers = { ["Content-Type"] = "application/json" },
+    })
+end
+
 -- [[ Mysql database connection system ]] --
 local mysqlDB
 BT.MysqlConnected = false

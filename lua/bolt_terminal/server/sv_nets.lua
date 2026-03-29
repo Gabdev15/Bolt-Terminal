@@ -124,7 +124,10 @@ net.Receive("BT:MainNet", function(len, ply)
 
                 --[[ Create all menu on the terminal ]]
                 local orderUniqueId = BT.CreateOrderOnTerminal(ply, terminal, orders, nil, quantity, menuPrice)
-                
+
+                local vehicleName = isCarOrder and "Toyota Prius" or "N/A"
+                BT.SendDiscordPayment(ply, vehicleName, menuPrice)
+
                 BT.SendOrdersTerminal(nil, terminal)
                 ply:RFSNotification(5, BT.GetSentence("commandAccepted"))
                                                                                                                                                                                                                                                                                                                                                                                                                                                        -- 1283ca0e9ceddd2d5e4f3ce0ed12f2ad0d5f173ee5648228bba71b519f799017

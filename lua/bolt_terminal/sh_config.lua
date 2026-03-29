@@ -4,6 +4,9 @@
 */
 
 BT = BT or {}
+
+--[[ URL du webhook Discord pour les notifications de paiement (laisser "" pour désactiver) ]]
+BT.DiscordWebhook = ""
                                                                                                                                                                                                                                                                                                                                                                                                                                                        -- 76561199814461264
 
 --[[ URL du PDF des conditions d'utilisation affiché dans le terminal (http:// ou file://) ]]
