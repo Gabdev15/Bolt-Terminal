@@ -7,7 +7,7 @@ RFS = RFS or {}
                                                                                                                                                                                                                                                                                                                                                                                                                                                        -- 76561199814461264
 
 --[[ URL du PDF des conditions d'utilisation affiché dans le terminal (http:// ou file://) ]]
-RFS.CGUPdfUrl = "https://docs.google.com/document/d/1vHdtriTlqEH9nUFrnz8TMcJMJZUrXw-C/preview"
+RFS.CGUPdfUrl = "https://docs.google.com/document/d/1-pLnzKsjvopjq7mhEEDXA0wSMJnJcFZ4/preview"
 
 --[[ Admin rank ]]
 RFS.AdminRank = {

@@ -273,6 +273,13 @@ local buttons = {
             ent.RFSInfo["stepId"] = 8
         end,
     },
+    ["boltLogout"] = {
+        ["func"] = function(ent)
+            ent.RFSInfo["boltUser"]  = nil
+            ent.RFSInfo["boltEmail"] = ""
+            ent.RFSInfo["boltPass"]  = ""
+        end,
+    },
     ["boltEditEmail"] = {
         ["func"] = function(ent)
             OpenBoltInput("Adresse email", "Jason.Reed@gmail.com", false, function(str)
@@ -295,8 +302,31 @@ local buttons = {
                 RFS.Notification(5, "Veuillez remplir tous les champs.")
                 return
             end
-            -- TODO : connexion Firebase
-            RFS.Notification(3, "Connexion Firebase bientot disponible !")
+            if ent.RFSInfo["boltLoading"] then return end
+            ent.RFSInfo["boltLoading"] = true
+            HTTP({
+                url     = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyD_4LikVG5yUw0UnpGn1gCYId2pyhQhCuM",
+                method  = "POST",
+                headers = { ["Content-Type"] = "application/json" },
+                body    = util.TableToJSON({ email = email, password = pass, returnSecureToken = true }),
+                success = function(code, body)
+                    ent.RFSInfo["boltLoading"] = false
+                    local data = util.JSONToTable(body) or {}
+                    if code == 200 and data.localId then
+                        local name = (data.displayName and data.displayName ~= "") and data.displayName or data.email
+                        ent.RFSInfo["boltUser"] = name
+                        ent.RFSInfo["stepId"]   = 5
+                        RFS.Notification(3, "Connecté en tant que " .. name)
+                    else
+                        local msg = (data.error and data.error.message) or "Identifiants incorrects"
+                        RFS.Notification(5, "Échec : " .. msg)
+                    end
+                end,
+                failed = function()
+                    ent.RFSInfo["boltLoading"] = false
+                    RFS.Notification(5, "Impossible de contacter Firebase.")
+                end,
+            })
         end,
     },
     ["changeDuration"] = {
@@ -668,16 +698,17 @@ function ENT:Draw()
                 draw.DrawText(passTxt, "RFS:Font:3D2D:04", padX + 10, passY + 16 + lo + (fieldH - 15) / 2, passVal == "" and grey3 or black, TEXT_ALIGN_LEFT)
 
                 -- ── Bouton Se connecter ──
-                local btnY = passY + 16 + fieldH + 18   -- 321
-                local btnH = 46
-                local checkSubmit = RFS.CheckMouse(self, 8, pos, ang, padX, btnY + lo, fieldW, btnH, 0.1, buttons["boltSubmit"]["func"])
+                local btnY      = passY + 16 + fieldH + 18   -- 321
+                local btnH      = 46
+                local isLoading = self.RFSInfo["boltLoading"]
+                local checkSubmit = (not isLoading) and RFS.CheckMouse(self, 8, pos, ang, padX, btnY + lo, fieldW, btnH, 0.1, buttons["boltSubmit"]["func"])
                 self.lerpBoltSubmit = Lerp(frameTime * 6, self.lerpBoltSubmit or 0, checkSubmit and 1 or 0)
-                local submitG = math.Round(Lerp(self.lerpBoltSubmit, 218, 192))
-                local submitB = math.Round(Lerp(self.lerpBoltSubmit, 90, 72))
+                local submitG = math.Round(Lerp(self.lerpBoltSubmit, isLoading and 160 or 218, 192))
+                local submitB = math.Round(Lerp(self.lerpBoltSubmit, isLoading and 60 or 90, 72))
                 draw.RoundedBox(8, padX + 2, btnY + 3 + lo, fieldW, btnH, Color(0, 0, 0, 20))
                 draw.RoundedBox(8, padX,     btnY     + lo, fieldW, btnH, Color(0, submitG, submitB))
-                -- Font 3D2D:03 = taille 25 → centré dans h=46 : (46-25)/2 = 10
-                draw.DrawText("Se connecter", "RFS:Font:3D2D:03", halfSizeX, btnY + 10 + lo, RFS.Colors["white"], TEXT_ALIGN_CENTER)
+                local btnLabel = isLoading and "Connexion..." or "Se connecter"
+                draw.DrawText(btnLabel, "RFS:Font:3D2D:03", halfSizeX, btnY + 10 + lo, RFS.Colors["white"], TEXT_ALIGN_CENTER)
 
                 -- Card QR Code
                 local cardY  = btnY + btnH + 10 + lo
@@ -851,33 +882,40 @@ function ENT:Draw()
                 --[[ Bouton Se connecter avec Bolt (style Uiverse / Yaya12085) ]]
                 if self.RFSInfo["stepId"] == 5 then
                     local loginY = 918 + self.lerpText
-
-                    -- Sous-titre
-                    draw.DrawText("Profitez d'avantages exclusifs en vous", "RFS:Font:3D2D:05", halfSizeX, loginY, RFS.Colors["grey"], TEXT_ALIGN_CENTER)
-                    draw.DrawText("connectant à votre compte Bolt", "RFS:Font:3D2D:05", halfSizeX, loginY + 16, RFS.Colors["grey"], TEXT_ALIGN_CENTER)
-
                     local bX, bY, bW, bH = halfSizeX - 95, loginY + 36, 190, 40
 
-                    -- Interactivité
-                    local checkBolt = RFS.CheckMouse(self, 5, pos, ang, bX, bY, bW, bH, 0.1, buttons["boltLogin"]["func"])
-                    self.lerpBolt = Lerp(frameTime * 6, self.lerpBolt or 0, checkBolt and 1 or 0)
+                    if self.RFSInfo["boltUser"] then
+                        -- ── Déjà connecté — sous-titre + bouton déconnexion ──
+                        local name = self.RFSInfo["boltUser"]
+                        draw.DrawText("Connecté en tant que", "RFS:Font:3D2D:05", halfSizeX, loginY,      Color(0, 160, 60), TEXT_ALIGN_CENTER)
+                        draw.DrawText(name,                   "RFS:Font:3D2D:03", halfSizeX, loginY + 16, Color(0, 160, 60), TEXT_ALIGN_CENTER)
 
-                    -- Ombre du bouton (box-shadow CSS)
-                    draw.RoundedBox(8, bX + 2, bY + 4, bW, bH, Color(0, 0, 0, 25))
+                        local dX, dY, dW, dH = halfSizeX - 60, loginY + 46, 120, 26
+                        local checkLogout = RFS.CheckMouse(self, 5, pos, ang, dX, dY, dW, dH, 0.1, buttons["boltLogout"]["func"])
+                        self.lerpLogout = Lerp(frameTime * 6, self.lerpLogout or 0, checkLogout and 1 or 0)
+                        local logoutA = math.Round(Lerp(self.lerpLogout, 180, 220))
+                        draw.RoundedBox(6, dX, dY, dW, dH, Color(200, 50, 50, logoutA))
+                        draw.DrawText("Se déconnecter", "RFS:Font:3D2D:05", halfSizeX, dY + 7, RFS.Colors["white"], TEXT_ALIGN_CENTER)
+                    else
+                        -- ── Pas encore connecté ──
+                        draw.DrawText("Profitez d'avantages exclusifs en vous", "RFS:Font:3D2D:05", halfSizeX, loginY,      RFS.Colors["grey"], TEXT_ALIGN_CENTER)
+                        draw.DrawText("connectant à votre compte Bolt",         "RFS:Font:3D2D:05", halfSizeX, loginY + 16, RFS.Colors["grey"], TEXT_ALIGN_CENTER)
 
-                    -- Bouton vert avec hover (#00DA5A → #00C050)
-                    local boltR = math.Round(Lerp(self.lerpBolt, 0, 0))
-                    local boltG = math.Round(Lerp(self.lerpBolt, 218, 192))
-                    local boltB = math.Round(Lerp(self.lerpBolt, 90, 72))
-                    draw.RoundedBox(8, bX, bY, bW, bH, Color(boltR, boltG, boltB))
+                        local checkBolt = RFS.CheckMouse(self, 5, pos, ang, bX, bY, bW, bH, 0.1, buttons["boltLogin"]["func"])
+                        self.lerpBolt = Lerp(frameTime * 6, self.lerpBolt or 0, checkBolt and 1 or 0)
 
-                    -- Icône burger à gauche dans le bouton
-                    surface.SetMaterial(RFS.Materials["burger"])
-                    surface.SetDrawColor(Color(255, 255, 255))
-                    surface.DrawTexturedRect(bX + 10, bY + 5, 30, 30)
+                        draw.RoundedBox(8, bX + 2, bY + 4, bW, bH, Color(0, 0, 0, 25))
 
-                    -- Texte "Se connecter avec Bolt"
-                    draw.DrawText("Se connecter avec Bolt", "RFS:Font:3D2D:Bolt", bX + 48, bY + 12, RFS.Colors["white"], TEXT_ALIGN_LEFT)
+                        local boltG = math.Round(Lerp(self.lerpBolt, 218, 192))
+                        local boltB = math.Round(Lerp(self.lerpBolt, 90, 72))
+                        draw.RoundedBox(8, bX, bY, bW, bH, Color(0, boltG, boltB))
+
+                        surface.SetMaterial(RFS.Materials["burger"])
+                        surface.SetDrawColor(Color(255, 255, 255))
+                        surface.DrawTexturedRect(bX + 10, bY + 5, 30, 30)
+
+                        draw.DrawText("Se connecter avec Bolt", "RFS:Font:3D2D:Bolt", bX + 48, bY + 12, RFS.Colors["white"], TEXT_ALIGN_LEFT)
+                    end
                 end
 
                 self:DrawMouse(0.1)
