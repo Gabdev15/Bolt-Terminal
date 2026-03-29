@@ -1,5 +1,0 @@
-"VertexlitGeneric"
-{
-	$basetexture "models/realistic_food_system/rfs_oil_layer"
-	$translucent 1
-}

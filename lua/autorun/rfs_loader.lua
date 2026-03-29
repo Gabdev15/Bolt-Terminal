@@ -20,7 +20,6 @@ if SERVER then
     include("realistic_fastfood/server/sv_functions.lua")
     include("realistic_fastfood/server/sv_nets.lua")
     include("realistic_fastfood/server/sv_hooks.lua")
-    include("realistic_fastfood/server/sv_cooking.lua")
                                                                                                                                                                                                                                                                                                                                                                                                                                                        -- 1283ca0e9ceddd2d5e4f3ce0ed12f2ad0d5f173ee5648228bba71b519f799017
                                                                                                                                                                                                                                                                                                                                                                                                                                                        -- 9df8a41e67be64bef2e3a0ecea717cb3cf78369cf6ecfcb6b671f6aa5106af46
     
@@ -38,15 +37,11 @@ if SERVER then
     AddCSLuaFile("realistic_fastfood/client/cl_main.lua")
     AddCSLuaFile("realistic_fastfood/client/cl_notify.lua")
     AddCSLuaFile("realistic_fastfood/client/cl_terminal.lua")
-    AddCSLuaFile("realistic_fastfood/client/cl_cooking.lua")
     AddCSLuaFile("realistic_fastfood/client/cl_halo.lua")
-    AddCSLuaFile("realistic_fastfood/client/cl_screen.lua")
 else
     include("realistic_fastfood/client/cl_fonts.lua")
     include("realistic_fastfood/client/cl_main.lua")
     include("realistic_fastfood/client/cl_notify.lua")
     include("realistic_fastfood/client/cl_terminal.lua")
-    include("realistic_fastfood/client/cl_cooking.lua")
     include("realistic_fastfood/client/cl_halo.lua")
-    include("realistic_fastfood/client/cl_screen.lua")
 end

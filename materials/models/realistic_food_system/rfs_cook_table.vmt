@@ -1,9 +1,0 @@
-"VertexlitGeneric"
-{
-	"$basetexture" "models/realistic_food_system/rfs_cook_table"
-	"$bumpmap" "models/realistic_food_system/rfs_cook_table_normal"
-	$phong 1
-  	$phongexponent 3
-    	$phongboost    3
-    	$phongfresnelranges    "[0.05 0.5 1]"
-}

@@ -189,9 +189,6 @@ hook.Add("HUDPaint", "RFS:HUDPaint:Init", function()
     RFS.CursorPos = RFS.CursorPos or {}
     RFS.ScrW, RFS.ScrH = ScrW(), ScrH()
 
-    RFS.CreateRenderTarget(RFS.Distributor)
-    RFS.CreateRenderTarget(RFS.Missions, "rfs_missions_")
-
     RFS.LoadFonts()
 
     net.Start("RFS:MainNet")
