@@ -196,72 +196,6 @@ net.Receive("BT:MainNet", function(len, ply)
             net.WriteUInt(2, 5)
         net.Send(ply)
 
-    --[[ Order on the distributor ]]
-    elseif uInt == 7 then
-        if BT.CountCookerDistributor() > 0 then
-            ply:RFSNotification(5, BT.GetSentence("noCooker"))
-            return
-        end 
-
-        local distributor = ply:GetEyeTrace().Entity
-        if not IsValid(distributor) then return end
-
-        if not ply:RFSCheckNearEntity(distributor, "bt_distributor", 100) then
-            ply:RFSNotification(5, BT.GetSentence("tooFar"))
-            return 
-        end
-
-        local countOrder = net.ReadUInt(16)
-        
-        local price, orderList = 0, {}
-        for i=1, countOrder do
-            local uniqueName = net.ReadString()
-            if not BT.Distributor[uniqueName] then return end 
-
-            local quantity = net.ReadUInt(16)
-            if not isnumber(quantity) then continue end
-
-            local unityPrice = BT.Distributor[uniqueName]["price"] or 0
-            if not isnumber(unityPrice) then continue end
-    
-            price = price + (unityPrice*quantity)
-
-            for i=1, quantity do
-                orderList[#orderList + 1] = {
-                    ["class"] = BT.Distributor[uniqueName]["class"],
-                    ["ingredientsTable"] = BT.Distributor[uniqueName]["ingredientsTable"],
-                    ["distributor"] = true,
-                    ["amountFood"] = (BT.Distributor[uniqueName]["amountFood"] or 0),
-                }
-            end
-        end
-
-        if #orderList > BT.MaxInventories then return end
-                                                                                                                                                                                                                                                                                                                                                                                                                                                       -- 1283ca0e9ceddd2d5e4f3ce0ed12f2ad0d5f173ee5648228bba71b519f799017
-
-        if ply:RFSGetMoney() > price then
-            local pos, ang = distributor:LocalToWorld(BT.Constants["vector101022"]), distributor:LocalToWorldAngles(BT.Constants["angle0902"])
-            
-            local canCreateBag = true
-            for k, v in ipairs(ents.FindInSphere(pos, 10)) do
-                if v:GetClass() == "bt_bag" then ply:RFSNotification(5, BT.GetSentence("noSpaceDistributor")) return end
-            end
-            
-            ply:RFSAddMoney(-price)
-
-            BT.Cooking.CreateBag(orderList, pos, ang, ply)
-            distributor:ResetSequence("open")
-
-            distributor.BT =  distributor.BT or {}
-            distributor.BT["open"] = true
-
-            net.Start("BT:MainNet")
-                net.WriteUInt(6, 5)
-                net.WriteEntity(distributor)
-            net.Send(ply)
-        else
-            ply:RFSNotification(5, BT.GetSentence("notEnoughMoney"))
-        end
     --[[ Save screen settings ]]
     elseif uInt == 8 then
         local screen = net.ReadEntity()
@@ -292,20 +226,6 @@ net.Receive("BT:MainNet", function(len, ply)
             net.WriteUInt(2, 5)
         net.Send(ply)
 
-    --[[ Change status of the dishes ]]
-    elseif uInt == 9 then
-        local dishes = net.ReadEntity()
-        if not IsValid(dishes) then return end
-
-        local owner = BT.GetOwner(dishes)
-        if owner != ply then return end
-
-        if not ply:RFSCheckNearEntity(dishes, "bt_dishes", 100) then
-            ply:RFSNotification(5, BT.GetSentence("tooFar"))
-            return 
-        end
-
-        BT.Cooking.DishesChangeStatus(dishes)
     --[[ Link screen to the terminal with the toolgun ]]
     elseif uInt == 10 then
         local baseEnt = net.ReadEntity()

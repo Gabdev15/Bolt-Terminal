@@ -72,52 +72,6 @@ function BT.DrawBeam(arg1, arg2, color)
     render.DrawBeam(pos1, pos2, 2, sysTime + clamp, sysTime, color)
 end
 
---[[ Format ingredients for the order ]]
-function BT.FormatIngredients(formatTable)
-    formatTable = formatTable or {}
-
-    local values = {
-        salad = tonumber(formatTable.salad) or 0,
-        tomato = tonumber(formatTable.tomato) or 0,
-        onion = tonumber(formatTable.onion) or 0,
-        cheese = tonumber(formatTable.cheese) or 0,
-        steak = tonumber(formatTable.steak) or 0
-    }
-
-    local ingredientStrings = {}
-
-    if values.salad > 0 then
-        ingredientStrings[#ingredientStrings + 1] = BT.GetSentence("amountSalad"):format(values.salad)
-    end
-
-    if values.tomato > 0 then
-        ingredientStrings[#ingredientStrings + 1] = BT.GetSentence("amountTomato"):format(values.tomato)
-    end
-
-    if values.onion > 0 then
-        ingredientStrings[#ingredientStrings + 1] = BT.GetSentence("amountOnion"):format(values.onion)
-    end
-
-    if values.cheese > 0 then
-        ingredientStrings[#ingredientStrings + 1] = BT.GetSentence("amountCheese"):format(values.cheese)
-    end
-    
-    if values.steak > 0 then
-        ingredientStrings[#ingredientStrings + 1] = BT.GetSentence("amountSteak"):format(values.steak)
-    end
-
-    local result = table.concat(ingredientStrings, ", ")
-
-    if #ingredientStrings > 0 then
-        result = "(" .. result .. ")"
-    end
-
-    if result == "" then
-        result = "("..BT.GetSentence("noIngredients")..")"
-    end
-
-    return result
-end
 
 function BT.ReturnLine(text, caracters)
     local result = ""
@@ -146,37 +100,6 @@ function BT.ReturnLine(text, caracters)
     return result
 end
 
---[[ Format title for the order ]]
-function BT.FormatTitleMenu(formatTable)
-    formatTable = formatTable or {}
-
-    local values = {
-        fries = tonumber(formatTable.fries) or 0,
-        soda = tonumber(formatTable.soda) or 0
-    }
-
-    local titleStrings = {}
-
-    if values.fries > 0 then
-        titleStrings[#titleStrings + 1] = BT.GetSentence("amountFries"):format(values.fries)
-    end
-
-    if values.soda > 0 and BT.SodaList[values.soda] then
-        local sodaTable = BT.SodaList[values.soda]
-        titleStrings[#titleStrings + 1] = sodaTable["uniqueName"] or BT.GetSentence("sodaUnknown")
-    end
-
-    local result = table.concat(titleStrings, ", ")
-
-    local titleMenu = BT.GetSentence("burger")
-
-    if #titleStrings > 0 then
-        titleMenu = titleMenu .. ", " .. result
-    end
-
-    return titleMenu or ""
-end
-                                                                                                                                                                                                                                                                                                                                                                                                                                                       -- 1283ca0e9ceddd2d5e4f3ce0ed12f2ad0d5f173ee5648228bba71b519f799017
 
 BT.HUDPaintInit = BT.HUDPaintInit or false
 
@@ -307,52 +230,7 @@ hook.Add("HUDPaint", "BT:HUDPaint:SyncNW", function()
         end
     end
 
-    if not IsValid(serviceMenu) && BT.ServiceSystem then
-        BT.OpenServiceMenu()
-    end
 end)
-
-function BT.OpenServiceMenu()
-    if IsValid(serviceMenu) then serviceMenu:Remove() end
-
-    local posXBox, posYBox = BT.ScrW*0.815, BT.ScrH*0.01
-    local sizeX, sizeY = BT.ScrW*0.18, BT.ScrH*0.1
-
-    serviceMenu = vgui.Create("DFrame")
-    serviceMenu:SetSize(sizeX, sizeY)
-    serviceMenu:SetPos(posXBox, posYBox)
-    serviceMenu:SetDraggable(false)
-    serviceMenu:ShowCloseButton(false)
-    serviceMenu.Paint = function(self, w, h)
-        if not BT.ServiceSystem then
-            serviceMenu:Remove()
-            return 
-        end
-
-        local onService = BT.GetNWVariables("bt_service", LocalPlayer())
-
-        draw.RoundedBox(6, 0, 0, w, h, BT.Colors["white"])
-        draw.DrawText((onService and BT.GetSentence("serviceOn") or BT.GetSentence("serviceOff")), "BT:Font:03", w/2, BT.ScrH*0.015, BT.Colors["black0255"], TEXT_ALIGN_CENTER)
-    end
-
-    local serviceButton = vgui.Create("DButton", serviceMenu)
-    serviceButton:SetSize(BT.ScrW*0.16, BT.ScrH*0.04)
-    serviceButton:SetPos(BT.ScrW*0.01, BT.ScrH*0.048)
-    serviceButton:SetText("Activer le service")
-    serviceButton:SetFont("BT:Font:02")
-    serviceButton:SetTextColor(BT.Colors["white"])
-    serviceButton.Paint = function(self, w, h)
-        local onService = BT.GetNWVariables("bt_service", LocalPlayer())
-
-        draw.RoundedBox(6, 0, 0, w, h, BT.Colors[onService and "red" or "orange"])
-        serviceButton:SetText(onService and BT.GetSentence("disableService") or BT.GetSentence("enableService"))
-    end
-    serviceButton.DoClick = function()
-        net.Start("BT:Cooking")
-            net.WriteUInt(5, 5)
-        net.SendToServer()
-    end
-end
 
 net.Receive("BT:MainNet", function()
     local uInt = net.ReadUInt(5)
