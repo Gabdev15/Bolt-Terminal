@@ -119,7 +119,6 @@ hook.Add("HUDPaint", "BT:HUDPaint:Init", function()
     net.SendToServer()
 
     BT.HUDPaintInit = true
-    BT.OpenServiceMenu()
 
     hook.Remove("HUDPaint", "BT:HUDPaint:Init")
 end)
