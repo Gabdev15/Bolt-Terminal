@@ -34,8 +34,8 @@ BT.ServiceSystem = false
 --[[ Max menu per command ]]
 BT.MaxMenu = 5
 
---[[ Max order by player ]]
-BT.MaxOrder = 1
+--[[ Max order by player (0 = illimité) ]]
+BT.MaxOrder = 0
 
 --[[ Price for the cooker for each vehicle ]]
 BT.PriceForCooker = {

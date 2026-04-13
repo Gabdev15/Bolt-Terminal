@@ -280,7 +280,7 @@ function BT.RemoveOrder(terminal, orderId, ply, notSend)
     local steamId64 = terminal.BT["orders"][orderId]["clientSteamID64"]
 
     BT.OrdersCount = BT.OrdersCount or {}
-    BT.OrdersCount[steamId64] = math.Clamp((BT.OrdersCount[steamId64] or 0) - 1, 0, BT.MaxOrder)
+    BT.OrdersCount[steamId64] = math.max((BT.OrdersCount[steamId64] or 0) - 1, 0)
     
     terminal.BT["orders"][orderId] = nil
     
@@ -338,7 +338,7 @@ function BT.CreateOrderOnTerminal(ply, terminal, orders, send, quantity, menuPri
     
     BT.OrdersCount = BT.OrdersCount or {}
     BT.OrdersCount[steamId] = BT.OrdersCount[steamId] or 0
-    BT.OrdersCount[steamId] = math.Clamp((BT.OrdersCount[steamId] + 1), 0, BT.MaxOrder)
+    BT.OrdersCount[steamId] = (BT.OrdersCount[steamId] + 1)
     
     terminal.BT["orders"][#terminal.BT["orders"] + 1] = {
         ["order"] = orders,

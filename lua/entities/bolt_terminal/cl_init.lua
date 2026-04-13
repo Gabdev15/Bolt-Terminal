@@ -633,7 +633,7 @@ function ENT:Draw()
                 draw.DrawText(BT.GetSentence("recapTitle"), "BT:Font:3D2D:01", halfSizeX, 630 + self.lerpText, black, TEXT_ALIGN_CENTER)
                 draw.DrawText(BT.GetSentence("recapDesc"), "BT:Font:3D2D:02", halfSizeX, 670 + self.lerpText, black, TEXT_ALIGN_CENTER)
                 
-                if #self.RFSInfo["orderList"] < BT.MaxOrder then
+                if true then
                     local checkMouse = BT.CheckMouse(self, 5, pos, ang, halfSizeX-100, 995 + self.lerpText, 200, 25, 0.1, buttons["newOrder"]["func"])
                     self.lerpContinue = self.lerpContinue or 0
                     self.lerpContinue = Lerp(frameTime*5, self.lerpContinue, (self.RFSInfo["stepId"] == 5 and (checkMouse and 240 or 200) or 0))

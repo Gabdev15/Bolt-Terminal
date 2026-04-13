@@ -54,10 +54,6 @@ net.Receive("BT:MainNet", function(len, ply)
         end
 
         BT.OrdersCount = BT.OrdersCount or {}
-        if (BT.OrdersCount[ply:SteamID64()] or 0) >= BT.MaxOrder then 
-            ply:RFSNotification(5, BT.GetSentence("maxOrder"))
-            return
-        end
 
         net.Start("BT:MainNet")
             net.WriteUInt(2, 5)
@@ -76,13 +72,9 @@ net.Receive("BT:MainNet", function(len, ply)
         end
         
         BT.OrdersCount = BT.OrdersCount or {}
-        if (BT.OrdersCount[ply:SteamID64()] or 0) >= BT.MaxOrder then 
-            ply:RFSNotification(5, BT.GetSentence("maxOrder"))
-            return
-        end
 
         local countOrder = net.ReadUInt(6)
-        countOrder = math.Clamp(countOrder, 1, BT.MaxOrder)
+        countOrder = math.max(1, countOrder)
         
         for i=1, countOrder do
             local orders = net.ReadString()

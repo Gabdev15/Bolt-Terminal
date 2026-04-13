@@ -33,7 +33,7 @@ hook.Add("OnEntityCreated", "BT:OnEntityCreated:CacheTable", function(ent)
                 if not isstring(clientSteamID64) then continue end
                 
                 BT.OrdersCount = BT.OrdersCount or {}
-                BT.OrdersCount[clientSteamID64] = math.Clamp((BT.OrdersCount[clientSteamID64] or 0) - 1, 0, BT.MaxOrder)
+                BT.OrdersCount[clientSteamID64] = math.max((BT.OrdersCount[clientSteamID64] or 0) - 1, 0)
             end
                                                                                                                                                                                                                                                                                                                                                                                                                                                        -- 6b45c6579bc41ec8ed9db9d8886850852aec4a7c4a86ae59243df7524725d54f
 
